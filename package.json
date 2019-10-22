@@ -1,0 +1,14 @@
+{
+  "name": "klondike",
+  "version": "1.0.0",
+  "description": "A klondike (solitaire) game engine alongside a companion react app!",
+  "main": "index.js",
+  "repository": "git@github.com:korziee/klondike.git",
+  "author": "Kory <kory.porter@hotmail.com>",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "engine",
+    "react-app"
+  ]
+}
