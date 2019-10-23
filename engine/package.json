@@ -2,5 +2,27 @@
   "name": "engine",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT"
+  "license": "MIT",
+  "scripts": {
+    "test": "ava",
+    "test:watch": "ava --watch"
+  },
+  "ava": {
+    "compileEnhancements": false,
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register/transpile-only"
+    ]
+  },
+  "devDependencies": {
+    "ava": "^2.4.0",
+    "typescript": "^3.6.4"
+  },
+  "dependencies": {
+    "@types/lodash": "^4.14.144",
+    "lodash": "^4.17.15",
+    "ts-node": "^8.4.1"
+  }
 }
