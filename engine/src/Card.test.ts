@@ -69,3 +69,19 @@ test("calling turnUp() multiple times does not have any effect", t => {
   card.turnUp();
   t.is(card.getUpturned(), true);
 });
+
+test("serialize() returns the correct serialized state", t => {
+  const card = new Card("Hearts", "King", true);
+  t.deepEqual(card.serialize(), {
+    suit: "Hearts",
+    rank: "King",
+    upturned: true
+  });
+});
+
+test("unserialize() returns a working class with the right data", t => {
+  const card = Card.unserialize({ rank: "5", suit: "Spades", upturned: true });
+  t.is(card.getRank(), "5");
+  t.is(card.getSuit(), "Spades");
+  t.is(card.getUpturned(), true);
+});

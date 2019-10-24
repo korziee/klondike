@@ -129,6 +129,29 @@ test("clear() returns the cleared cards in the correct order", t => {
   cards.forEach((card, i) => t.is(card, clearedCards[i]));
 });
 
+test("serialize() returns the correct serialized state", t => {
+  const cards = getRandomCards(5);
+  const pile = new Pile(cards);
+  const serializedPile = pile.serialize();
+
+  for (let i = 0; i < 5; i += 1) {
+    t.deepEqual(serializedPile.cards[i], cards[i].serialize());
+  }
+});
+
+test("unserialize() returns a working class with the right data", t => {
+  const pile = Pile.unserialize({
+    cards: [
+      { rank: "5", suit: "Spades", upturned: true },
+      { rank: "10", suit: "Hearts", upturned: true }
+    ]
+  });
+  t.is(pile.getCards()[0].getRank(), "5");
+  t.is(pile.getCards()[0].getSuit(), "Spades");
+  t.is(pile.getCards()[1].getSuit(), "Hearts");
+  t.is(pile.getCards()[1].getUpturned(), true);
+});
+
 // // there is no hard and fast math in this test
 // // it just test that atleast 5 out of 52 cards, do not match the original
 // test("shuffle() shuffles the cards within the pile", t => {
