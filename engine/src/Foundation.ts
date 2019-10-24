@@ -2,6 +2,7 @@ import { ISerializable } from "./types/ISerializable";
 import { Pile, ISerializedPile } from "./Pile";
 import { Card } from "./Card";
 import { getNextRankForCurrentRank } from "./helpers/getNextRankForRank";
+import { TSuit } from "./types/TSuit";
 
 export class HeartsFoundationPile extends Pile {
   constructor(cards: Card[]) {
@@ -42,7 +43,16 @@ export class HeartsFoundationPile extends Pile {
   }
 
   canRemoveCards(amount: number) {
-    return false;
+    const cardsInPile = this.getCards();
+
+    if (amount > cardsInPile.length) {
+      console.warn(
+        "[HeartsFoundationPile] Cannot remove more cards than what currently exists in the pile"
+      );
+      return false;
+    }
+
+    return true;
   }
 }
 
@@ -99,6 +109,7 @@ export interface IFoundation
   extends ISerializable<Foundation, ISerializedFoundation> {
   addCard(card: Card): boolean;
   removeCard(card: Card): boolean;
+  getPileForSuit(suit: TSuit): Pile;
 }
 
 export class Foundation implements IFoundation {
@@ -107,10 +118,13 @@ export class Foundation implements IFoundation {
   private diamonds: DiamondsFoundationPile = new DiamondsFoundationPile([]);
   private clubs: ClubsFoundationPile = new ClubsFoundationPile([]);
 
+  getPileForSuit(suit: TSuit): Pile {
+    const suitFoundationPileClass = this[suit.toLowerCase()] as Pile;
+    return suitFoundationPileClass;
+  }
+
   addCard(card: Card): boolean {
     const suit = card.getSuit().toLowerCase();
-
-    console.log(1, suit);
     const suitFoundationPileClass = this[suit] as Pile;
 
     if (!suitFoundationPileClass.canAddCards([card])) {

@@ -19,4 +19,22 @@ test.only("can only add incrementing hearts to the HeartsFoundationPile", t => {
   t.false(cardAdded);
 });
 
+test.only("can remove cards from the HeartsFoundationPile", t => {
+  const foundation = new Foundation();
+  foundation.addCard(new Card("Hearts", "Ace", false));
+  foundation.addCard(new Card("Hearts", "2", false));
+  t.is(foundation.getPileForSuit("Hearts").getCards().length, 2);
+  let cardRemoved = foundation.removeCard(new Card("Hearts", "2", false));
+  t.true(cardRemoved);
+  t.is(foundation.getPileForSuit("Hearts").getCards().length, 1);
+});
+
+test.only("cannot remove a card from the HeartsFoundationPile if there are no cards in the pile", t => {
+  const foundation = new Foundation();
+  let cardRemoved = foundation.removeCard(new Card("Hearts", "7", false));
+  t.false(cardRemoved);
+});
+
 // test the foundation class here
+
+test("removeCard() actually removes a card from the pile", t => {});
