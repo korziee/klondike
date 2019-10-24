@@ -15,14 +15,14 @@ export interface IPile extends ISerializable<Pile, ISerializedPile> {
   shuffle(): void;
 
   // validation rules
-  canRemoveCards(cards: Card[]): boolean;
+  canRemoveCards(amount: number): boolean;
   canAddCards(cards: Card[]): boolean;
 }
 
 export class Pile implements IPile {
   constructor(private cards: Card[]) {}
 
-  canRemoveCards(cards: Card[]): boolean {
+  canRemoveCards(amount: number): boolean {
     throw new Error("Method is abstract, implemented method to use");
   }
   canAddCards(cards: Card[]): boolean {
