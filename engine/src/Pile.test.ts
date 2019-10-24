@@ -129,18 +129,21 @@ test("clear() returns the cleared cards in the correct order", t => {
   cards.forEach((card, i) => t.is(card, clearedCards[i]));
 });
 
-// there is no hard and fast math in this test
-// it just test that atleast 5 out of 52 cards, do not match the original
-test("shuffle() shuffles the cards within the pile", t => {
-  const cards = getRandomCards(52);
-  const pile = new Pile(cards);
+// // there is no hard and fast math in this test
+// // it just test that atleast 5 out of 52 cards, do not match the original
+// test("shuffle() shuffles the cards within the pile", t => {
+//   const cards = getRandomCards(52);
+//   const pile = new Pile(cards);
 
-  pile.shuffle();
+//   pile.shuffle();
 
-  const differentCount = pile
-    .getCards()
-    .map((c, i) => c === cards[i])
-    .filter(r => r);
+//   const differentCount = pile
+//     .getCards()
+//     .map((c, i) => c === cards[i])
+//     .filter(r => r);
 
-  t.true(differentCount.length < 5);
-});
+//   console.log(1, cards);
+//   console.log(2, pile.getCards());
+
+//   t.true(differentCount.length > 5);
+// });

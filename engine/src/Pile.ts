@@ -1,5 +1,5 @@
-import * as _ from "lodash";
 import { Card } from "./Card";
+import { shuffle } from "@korziee/helpers";
 
 export interface IPile {
   getCards(): Card[];
@@ -53,7 +53,7 @@ export class Pile implements IPile {
    * @note Lodash shuffle uses the fisher yates algoritm to shuffle
    */
   shuffle(): void {
-    const shuffledCards = _.shuffle([...this.cards]);
+    const shuffledCards = shuffle<Card>(this.cards);
     this.cards = shuffledCards;
   }
 }
