@@ -13,10 +13,21 @@ export interface IPile extends ISerializable<Pile, ISerializedPile> {
   removeCards(amount: number): Card[];
   clear(): Card[];
   shuffle(): void;
+
+  // validation rules
+  canRemoveCards(cards: Card[]): boolean;
+  canAddCards(cards: Card[]): boolean;
 }
 
 export class Pile implements IPile {
   constructor(private cards: Card[]) {}
+
+  canRemoveCards(cards: Card[]): boolean {
+    throw new Error("Method is abstract, implemented method to use");
+  }
+  canAddCards(cards: Card[]): boolean {
+    throw new Error("Method is abstract, implemented method to use");
+  }
 
   serialize() {
     return {

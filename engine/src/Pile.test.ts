@@ -152,6 +152,14 @@ test("unserialize() returns a working class with the right data", t => {
   t.is(pile.getCards()[1].getUpturned(), true);
 });
 
+test("canRemoveCards() throws if unimplemented", t => {
+  t.throws(() => new Pile([]).canRemoveCards([]));
+});
+
+test("canAddCards() throws if unimplemented", t => {
+  t.throws(() => new Pile([]).canAddCards([]));
+});
+
 // // there is no hard and fast math in this test
 // // it just test that atleast 5 out of 52 cards, do not match the original
 // test("shuffle() shuffles the cards within the pile", t => {
