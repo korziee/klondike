@@ -1,7 +1,12 @@
-import { Card } from "./Card";
+import { Card, ISerializedCard } from "./Card";
 import { shuffle } from "@korziee/helpers";
+import { ISerializable } from "./types/ISerializable";
 
-export interface IPile {
+export interface ISerializedPile {
+  cards: ISerializedCard[];
+}
+
+export interface IPile extends ISerializable<Pile, ISerializedPile> {
   getCards(): Card[];
   setCards(cards: Card[]): void;
   addCards(cards: Card[]): void;
@@ -12,6 +17,16 @@ export interface IPile {
 
 export class Pile implements IPile {
   constructor(private cards: Card[]) {}
+
+  serialize() {
+    return {
+      cards: this.cards.map(c => c.serialize())
+    };
+  }
+
+  static unserialize({ cards }: ISerializedPile) {
+    return new Pile(cards.map(c => Card.unserialize(c)));
+  }
 
   getCards(): Card[] {
     return this.cards;

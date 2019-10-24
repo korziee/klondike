@@ -1,7 +1,14 @@
 import { TRank } from "./types/TRank";
 import { TSuit } from "./types/TSuit";
+import { ISerializable } from "./types/ISerializable";
 
-export interface ICard {
+export interface ISerializedCard {
+  suit: TSuit;
+  rank: TRank;
+  upturned: boolean;
+}
+
+export interface ICard extends ISerializable<Card, ISerializedCard> {
   getSuit(): TSuit;
   getRank(): TRank;
   getUpturned(): boolean;
@@ -19,6 +26,18 @@ export class Card implements ICard {
     private rank: TRank,
     private upturned: boolean
   ) {}
+
+  serialize() {
+    return {
+      suit: this.suit,
+      rank: this.rank,
+      upturned: this.upturned
+    };
+  }
+
+  static unserialize({ rank, suit, upturned }: ISerializedCard) {
+    return new Card(suit, rank, upturned);
+  }
 
   getSuit() {
     return this.suit;
