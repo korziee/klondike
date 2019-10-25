@@ -1,6 +1,7 @@
 import { Card, ISerializedCard } from "./Card";
 import { shuffle } from "@korziee/helpers";
 import { ISerializable } from "../types/ISerializable";
+import * as _ from "lodash";
 
 export interface ISerializedPile {
   cards: ISerializedCard[];
@@ -10,23 +11,27 @@ export interface IPile extends ISerializable<Pile, ISerializedPile> {
   getCards(): Card[];
   setCards(cards: Card[]): void;
   addCards(cards: Card[]): void;
-  removeCards(amount: number): Card[];
+  removeCards(cards: Card[]): void;
   clear(): Card[];
   shuffle(): void;
 
   // validation rules
-  canRemoveCards(amount: number): boolean;
+  canRemoveCards(cards: Card[]): boolean;
   canAddCards(cards: Card[]): boolean;
+  canSetCards(cards: Card[]): boolean;
 }
 
 export class Pile implements IPile {
   constructor(private cards: Card[]) {}
 
-  canRemoveCards(amount: number): boolean {
-    throw new Error("Method is abstract, implemented method to use");
+  canRemoveCards(cards: Card[]): boolean {
+    throw new Error("Method is abstract, implement method to use");
   }
   canAddCards(cards: Card[]): boolean {
-    throw new Error("Method is abstract, implemented method to use");
+    throw new Error("Method is abstract, implement method to use");
+  }
+  canSetCards(cards: Card[]): boolean {
+    throw new Error("Method is abstract, implement method to use");
   }
 
   serialize() {
@@ -44,26 +49,35 @@ export class Pile implements IPile {
   }
 
   setCards(cards: Card[]): void {
+    if (!this.canSetCards(cards)) {
+      console.warn("Set cards validation failed");
+      return;
+    }
     this.cards = cards;
   }
 
   addCards(cards: Card[]): void {
+    if (!this.canAddCards(cards)) {
+      console.warn("Add cards validation failed");
+      return;
+    }
+
     this.cards.push(...cards);
   }
 
-  removeCards(amount: number): Card[] {
-    // we use slice over splice here as it does not mutate the original array.
-    // it's alot more code, but less error prone!
-    const cardsToBeRemoved = this.cards.slice(-amount);
-    const cardsToSet = [];
-
-    for (let i = 0; i < this.cards.length - amount; i += 1) {
-      cardsToSet.push(this.cards[i]);
+  removeCards(cards: Card[]): void {
+    if (!this.canRemoveCards(cards)) {
+      console.warn("Remove cards validation failed");
+      return;
     }
 
-    this.cards = cardsToSet;
-
-    return cardsToBeRemoved;
+    // find all cards that match the cards parameter and remove
+    this.cards = this.cards.filter(card => {
+      const isInRemoveList = cards.find(
+        c => card.getRank() === c.getRank() && card.getSuit() === c.getSuit()
+      );
+      return !isInRemoveList;
+    });
   }
 
   clear(): Card[] {
