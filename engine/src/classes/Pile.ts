@@ -65,19 +65,35 @@ export class Pile implements IPile {
     this.cards.push(...cards);
   }
 
+  /**
+   * If the pile has duplicates, this will only the first card it finds on the stack (from the back)
+   */
   removeCards(cards: Card[]): void {
     if (!this.canRemoveCards(cards)) {
       console.warn("Remove cards validation failed");
       return;
     }
 
+    let cardsRemovedCount = 0;
+
     // find all cards that match the cards parameter and remove
     this.cards = this.cards.filter(card => {
       const isInRemoveList = cards.find(
         c => card.getRank() === c.getRank() && card.getSuit() === c.getSuit()
       );
+
+      if (isInRemoveList) {
+        cardsRemovedCount += 1;
+      }
+
       return !isInRemoveList;
     });
+
+    if (cardsRemovedCount !== cards.length) {
+      console.warn(
+        "An inequal amount of cards were removed, this likely means that the pile did not contain all of the cards that were asked to be removed"
+      );
+    }
   }
 
   clear(): Card[] {
