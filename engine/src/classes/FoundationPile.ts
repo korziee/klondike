@@ -36,6 +36,11 @@ export class FoundationPile extends Pile {
     return foundationPile;
   }
 
+  // this method overwrites
+  canSetCards() {
+    return true;
+  }
+
   canRemoveCards(cards: Card[]): boolean {
     const cardsInPile = this.getCards();
     const cardOnTopOfPile = cardsInPile[cardsInPile.length - 1];
@@ -60,6 +65,8 @@ export class FoundationPile extends Pile {
       );
       return false;
     }
+
+    return true;
   }
 
   canAddCards(cards: Card[]): boolean {

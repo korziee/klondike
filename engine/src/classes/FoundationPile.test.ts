@@ -88,6 +88,8 @@ test("Cannot remove a card that is not on the top of the pile", t => {
   t.is(foundationPile.getCards().length, 5);
 });
 
+// TODO - actually test removing smh
+
 test("serialize returns correct suit", t => {
   const foundationPile = new FoundationPile("Clubs");
   foundationPile.addCards([
