@@ -1,8 +1,8 @@
-import { ISerializable } from "./types/ISerializable";
+import { ISerializable } from "../types/ISerializable";
 import { Pile, ISerializedPile } from "./Pile";
 import { Card } from "./Card";
-import { getNextRankForCurrentRank } from "./helpers/getNextRankForRank";
-import { TSuit } from "./types/TSuit";
+import { getNextRankForCurrentRank } from "../helpers/getNextRankForRank";
+import { TSuit } from "../types/TSuit";
 
 export class HeartsFoundationPile extends Pile {
   constructor(cards: Card[]) {

@@ -1,6 +1,6 @@
 import { Card, ISerializedCard } from "./Card";
 import { shuffle } from "@korziee/helpers";
-import { ISerializable } from "./types/ISerializable";
+import { ISerializable } from "../types/ISerializable";
 
 export interface ISerializedPile {
   cards: ISerializedCard[];

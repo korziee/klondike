@@ -1,8 +1,8 @@
 import test from "ava";
 import { Pile } from "./Pile";
 import { Card } from "./Card";
-import { getRandomSuit } from "./helpers/getRandomSuit";
-import { getRandomRank } from "./helpers/getRandomRank";
+import { getRandomSuit } from "../helpers/getRandomSuit";
+import { getRandomRank } from "../helpers/getRandomRank";
 
 const getRandomCards = (amount: number): Card[] => {
   const cards: Card[] = [];

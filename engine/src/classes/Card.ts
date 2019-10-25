@@ -1,6 +1,6 @@
-import { TRank } from "./types/TRank";
-import { TSuit } from "./types/TSuit";
-import { ISerializable } from "./types/ISerializable";
+import { TRank } from "../types/TRank";
+import { TSuit } from "../types/TSuit";
+import { ISerializable } from "../types/ISerializable";
 
 export interface ISerializedCard {
   suit: TSuit;
