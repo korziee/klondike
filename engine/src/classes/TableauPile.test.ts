@@ -2,6 +2,29 @@ import test from "ava";
 import { TableauPile } from "./TableauPile";
 import { Card } from "./Card";
 
+test("the constructor should turn up the card on the on the top of the stack", t => {
+  const cards = [
+    new Card("Clubs", "9", false),
+    new Card("Clubs", "5", false),
+    new Card("Clubs", "2", false),
+    new Card("Clubs", "Ace", false)
+  ];
+  const tableauPile = new TableauPile(cards);
+  t.is(tableauPile.getCards()[3].getUpturned(), true);
+});
+
+test("setCards() should turn up the card on the top of the stack", t => {
+  const cards = [
+    new Card("Clubs", "9", false),
+    new Card("Clubs", "5", false),
+    new Card("Clubs", "2", false),
+    new Card("Clubs", "Ace", false)
+  ];
+  const tableauPile = new TableauPile([]);
+  tableauPile.setCards(cards);
+  t.is(tableauPile.getCards()[3].getUpturned(), true);
+});
+
 test("cannot remove cards that are not 'upturned'", t => {
   const cards = [
     new Card("Clubs", "9", false),
@@ -44,8 +67,8 @@ test("cannot remove cards that are not alternating", t => {
   const cards = [
     new Card("Clubs", "9", false),
     new Card("Hearts", "5", false),
-    new Card("Diamonds", "2", false),
-    new Card("Clubs", "Ace", true),
+    new Card("Diamonds", "3", false),
+    new Card("Clubs", "Ace", false),
     new Card("Clubs", "3", true),
     new Card("Diamonds", "2", true),
     new Card("Spades", "Ace", true)
@@ -103,7 +126,6 @@ test("after removal of cards, the card on top of the stack is upturned", t => {
   const cards = [
     new Card("Clubs", "9", false),
     new Card("Hearts", "5", false),
-    new Card("Diamonds", "2", false),
     new Card("Spades", "10", false),
     new Card("Clubs", "3", true),
     new Card("Diamonds", "2", true),
@@ -112,18 +134,17 @@ test("after removal of cards, the card on top of the stack is upturned", t => {
   const tableauPile = new TableauPile(cards);
 
   // first assert that it isn't upturned
-  t.is(tableauPile.getCards()[3].getUpturned(), false);
+  t.is(tableauPile.getCards()[2].getUpturned(), false);
 
-  tableauPile.removeCards([cards[6], cards[5], cards[4]]);
+  tableauPile.removeCards([cards[5], cards[3], cards[4]]);
 
-  t.is(tableauPile.getCards()[3].getUpturned(), true);
+  t.is(tableauPile.getCards()[2].getUpturned(), true);
 });
 
 test("cannot add cards that are not alternating and sequential", t => {
   const cards = [
     new Card("Clubs", "9", false),
     new Card("Hearts", "5", false),
-    new Card("Diamonds", "2", false),
     new Card("Spades", "10", false),
     new Card("Clubs", "3", false),
     new Card("Diamonds", "2", false),
@@ -144,7 +165,6 @@ test("cannot add cards that are not alternating and sequential even if the first
   const cards = [
     new Card("Clubs", "9", false),
     new Card("Hearts", "5", false),
-    new Card("Diamonds", "2", false),
     new Card("Spades", "10", false),
     new Card("Clubs", "3", false),
     new Card("Diamonds", "2", false),
@@ -165,7 +185,6 @@ test("cannot add cards that are not all upturned", t => {
   const cards = [
     new Card("Clubs", "9", false),
     new Card("Hearts", "5", false),
-    new Card("Diamonds", "2", false),
     new Card("Spades", "10", false),
     new Card("Clubs", "3", false),
     new Card("Diamonds", "2", false),
@@ -187,7 +206,6 @@ test("cannot add cards that are all the same suit", t => {
   const cards = [
     new Card("Clubs", "9", false),
     new Card("Hearts", "5", false),
-    new Card("Diamonds", "2", false),
     new Card("Spades", "10", false),
     new Card("Clubs", "3", false),
     new Card("Diamonds", "2", false),
@@ -237,7 +255,7 @@ test("can remove cards that are sequential and alternating suit", t => {
   const cards = [
     new Card("Clubs", "9", false),
     new Card("Hearts", "5", false),
-    new Card("Diamonds", "2", false),
+    new Card("Diamonds", "3", false),
     new Card("Spades", "10", false),
     new Card("Clubs", "3", true),
     new Card("Diamonds", "2", true),
@@ -295,7 +313,6 @@ test("removeCards() is order agnostic", t => {
   const cards = [
     new Card("Clubs", "9", false),
     new Card("Hearts", "5", false),
-    new Card("Diamonds", "2", false),
     new Card("Spades", "10", false),
     new Card("Clubs", "3", true),
     new Card("Diamonds", "2", true),
@@ -303,7 +320,7 @@ test("removeCards() is order agnostic", t => {
   ];
   const tableauPile = new TableauPile(cards);
 
-  tableauPile.removeCards([cards[4], cards[6], cards[5]]);
+  tableauPile.removeCards([cards[3], cards[5], cards[4]]);
 
   t.is(tableauPile.getCards().length, cards.length - 3);
 });
@@ -330,6 +347,28 @@ test("addCards() is order agnostic", t => {
   ]);
 
   t.is(tableauPile.getCards().length, 5);
+});
+
+test("Cannot remove cards that do not exist on the pile", t => {
+  const cards = [
+    new Card("Clubs", "9", false),
+    new Card("Hearts", "5", false),
+    new Card("Diamonds", "2", false),
+    new Card("Diamonds", "4", false),
+    new Card("Clubs", "3", true),
+    new Card("Diamonds", "2", true),
+    new Card("Spades", "Ace", true)
+  ];
+  const tableauPile = new TableauPile(cards);
+
+  const canRemoveCards = tableauPile.canRemoveCards([
+    cards[6],
+    cards[5],
+    // hearts of 4 doesn't exist
+    new Card("Hearts", "4", true)
+  ]);
+
+  t.false(canRemoveCards);
 });
 
 // propably don't need to do this at extends pile and does not overwrite the serialize/unserialize
