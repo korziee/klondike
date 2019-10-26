@@ -161,6 +161,18 @@ test("cannot add cards that are not alternating and sequential", t => {
   t.false(canAddCards);
 });
 
+test("cannot add cards even if it just one card", t => {
+  const tableauPile = new TableauPile([
+    new Card("Spades", "King", false),
+    new Card("Hearts", "Queen", false),
+    new Card("Spades", "Jack", false),
+    new Card("Diamonds", "King", true)
+  ]);
+
+  const cardToPlace = new Card("Hearts", "4", true);
+  t.is(tableauPile.canAddCards([cardToPlace]), false);
+});
+
 test("cannot add cards that are not alternating and sequential even if the first card is sequential and alternating", t => {
   const cards = [
     new Card("Clubs", "9", false),

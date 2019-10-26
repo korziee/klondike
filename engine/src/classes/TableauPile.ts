@@ -61,7 +61,14 @@ const getColourForSuit = (suit: TSuit): "black" | "red" => {
   }
 };
 
-export class TableauPile extends Pile {
+// export interface ISerializedTableauPile {
+//   // cards: ISerializedCard[];
+// }
+
+export interface ITableauPile
+  extends ISerializable<TableauPile, ISerializedPile> {}
+
+export class TableauPile extends Pile implements ITableauPile {
   constructor(cards: Card[]) {
     // ensure that the first card is ALWAYS turned up
     super(cards);
@@ -149,8 +156,12 @@ export class TableauPile extends Pile {
     if (cardsInPile.length === 0 && sortedCards[0].getRank() === "King") {
       return true;
     }
+    const cardsAreAlternating = isAlternating(
+      cardsInPile[cardsInPile.length - 1],
+      sortedCards[0]
+    );
 
-    if (!isAlternating(cardsInPile[cardsInPile.length - 1], sortedCards[0])) {
+    if (!cardsAreAlternating.ok) {
       console.log(
         "Card on top of tableau pile does not alternate with the first card to add"
       );
@@ -202,5 +213,11 @@ export class TableauPile extends Pile {
 
     // if nothing in the for loop failed, we are okay to add the cards
     return true;
+  }
+
+  static unserialize(unserializedData: ISerializedPile): TableauPile {
+    return new TableauPile(
+      unserializedData.cards.map(c => Card.unserialize(c))
+    );
   }
 }
