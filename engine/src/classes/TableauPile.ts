@@ -7,7 +7,7 @@ export class TableauPile extends Pile {
     super(cards);
   }
 
-  canSetCards() {}
-  canAddCards() {}
-  canRemoveCards() {}
+  canSetCards(cards: Card[]): boolean {}
+  canAddCards(cards: Card[]): boolean {}
+  canRemoveCards(cards: Card[]): boolean {}
 }
