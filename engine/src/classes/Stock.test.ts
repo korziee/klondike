@@ -48,3 +48,25 @@ test("cards can be set", t => {
 
   t.deepEqual(stock.getCards(), cards);
 });
+
+test("serialize() returns the correct data", t => {
+  const cards = getRandomCards(10);
+  const stock = new Stock(cards);
+  t.deepEqual(stock.serialize().cards, cards.map(c => c.serialize()));
+});
+
+test("unserialize() returns an instance of Stock ", t => {
+  const cards = getRandomCards(10).map(c => c.serialize());
+
+  const stock = Stock.unserialize({ cards });
+
+  t.true(stock instanceof Stock);
+});
+
+test("unserialize() inserts the correct data", t => {
+  const cards = getRandomCards(10);
+
+  const stock = Stock.unserialize({ cards: cards.map(c => c.serialize()) });
+
+  t.deepEqual(stock.getCards(), cards);
+});

@@ -1,7 +1,12 @@
-import { Pile } from "./Pile";
+import { Pile, ISerializedPile } from "./Pile";
 import { Card } from "./Card";
+import { ISerializable } from "../types/ISerializable";
 
-export class Stock extends Pile {
+export interface ISerializedStock extends ISerializedPile {}
+
+export interface IStock extends ISerializable<Stock, ISerializedStock> {}
+
+export class Stock extends Pile implements IStock {
   static validateCards(cards: Card[]): void {
     const allAreUpturned = cards.every(c => c.getUpturned() === false);
     if (!allAreUpturned) {
@@ -13,6 +18,11 @@ export class Stock extends Pile {
   constructor(cards: Card[]) {
     Stock.validateCards(cards);
     super(cards);
+  }
+
+  static unserialize({ cards }) {
+    const unserializedCards = cards.map(c => Card.unserialize(c));
+    return new Stock(unserializedCards);
   }
 
   canAddCards(cards: Card[]): boolean {
@@ -27,7 +37,11 @@ export class Stock extends Pile {
   }
 
   canSetCards(cards: Card[]) {
-    Stock.validateCards(cards);
+    try {
+      Stock.validateCards(cards);
+    } catch (e) {
+      return false;
+    }
     return true;
   }
 }

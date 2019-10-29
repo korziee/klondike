@@ -7,3 +7,5 @@ Upon which it's use is entirely platform independent and can be used with differ
 ## Testing
 
 We are using the `"ts-node/register/transpile-only"` for ava, as we do not care for typescript errors during the tests. This is because this project has implemented TDD, and we don't want ts errors to fail the tests! D:
+
+-- add instance of checks to serialize tests
