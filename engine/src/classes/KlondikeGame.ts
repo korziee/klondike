@@ -31,7 +31,7 @@ export interface ISerializedKlondikeGame {
 export interface IKlondikeGame
   extends ISerializable<KlondikeGame, ISerializedKlondikeGame> {
   getHistory(): IMove[];
-  getHint(): IMove | null;
+  getHints(): IMove[] | null;
   validateMove(move: IMove): boolean;
   makeMove(move: IMove): void;
 }
