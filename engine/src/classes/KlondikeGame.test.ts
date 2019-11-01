@@ -1,11 +1,21 @@
 import test from "ava";
+import { KlondikeGame } from "./KlondikeGame";
 
-test("getHistory() returns the correct history", t => {});
+test("getHistory() returns the correct history", t => {
+  const game = new KlondikeGame();
+});
+test("history is modified on every successful move", t => {
+  const game = new KlondikeGame();
+});
 test("getHistory() returns the correct history in order", t => {});
 test("getHints() returns the correct hints if they exist", t => {});
 test("getHints() returns null if no hints exist", t => {});
 
+test("reset() returns all cards to the stock", t => {});
+test("reset() shuffles all cards after they are in th stock", t => {});
+
 // initial game state
+test("Before the cards are dealt, they are shufled within the stock", t => {});
 test("7 tableau piles exist on the board", t => {});
 test("the first tableau pile has one card at the beginning", t => {});
 test("the second tableau pile has two cards at the beginning", t => {});

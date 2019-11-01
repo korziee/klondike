@@ -34,6 +34,32 @@ export interface IKlondikeGame
   getHints(): IMove[] | null;
   validateMove(move: IMove): boolean;
   makeMove(move: IMove): void;
+  /**
+   * Starts a new game by resetting the game state, filling out the tableau and
+   * clearing the foundation.
+   */
+  start(): void;
+  /**
+   * Puts all the cards back into the stock and shuffles.
+   */
+  reset(): void;
 }
 
-export class KlondikeGame implements IKlondikeGame {}
+export class KlondikeGame implements IKlondikeGame {
+  serialize(): ISerializedKlondikeGame {
+    return null;
+  }
+  static unserialize(serializedGame: ISerializedKlondikeGame) {}
+  start() {}
+  reset() {}
+  validateMove(move: IMove): boolean {
+    return null;
+  }
+  makeMove(move: IMove): void {}
+  getHints(): IMove[] | null {
+    return null;
+  }
+  getHistory(): IMove[] {
+    return null;
+  }
+}
