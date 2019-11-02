@@ -24,8 +24,8 @@ export class Foundation implements IFoundation {
   private diamonds: FoundationPile = new FoundationPile("Diamonds");
   private clubs: FoundationPile = new FoundationPile("Clubs");
 
-  getPileForSuit(suit: TSuit): Pile {
-    const suitFoundationPileClass = this[suit.toLowerCase()] as Pile;
+  getPileForSuit(suit: TSuit): FoundationPile {
+    const suitFoundationPileClass = this[suit.toLowerCase()] as FoundationPile;
     return suitFoundationPileClass;
   }
 

@@ -1,6 +1,50 @@
 import test from "ava";
-import { KlondikeGame, ISerializedKlondikeGame } from "./KlondikeGame";
+import { KlondikeGame, ISerializedKlondikeGame, IMove } from "./KlondikeGame";
 import { Card } from "./Card";
+import { getSerializedDeck } from "../helpers/getSerializedDeck";
+import * as _ from "lodash";
+import { TableauPile } from "./TableauPile";
+import { Foundation } from "./Foundation";
+import { FoundationPile } from "./FoundationPile";
+
+const getEmptySerializedGame = (): ISerializedKlondikeGame => ({
+  foundation: {
+    clubs: {
+      suit: "Clubs",
+      cards: []
+    },
+    hearts: {
+      suit: "Hearts",
+      cards: []
+    },
+    diamonds: {
+      suit: "Diamonds",
+      cards: []
+    },
+    spades: {
+      suit: "Spades",
+      cards: []
+    }
+  },
+  stock: {
+    cards: []
+  },
+  history: [],
+  waste: {
+    cards: []
+  },
+  tableau: {
+    piles: [
+      { cards: [] },
+      { cards: [] },
+      { cards: [] },
+      { cards: [] },
+      { cards: [] },
+      { cards: [] },
+      { cards: [] }
+    ]
+  }
+});
 
 test("getHistory() returns the correct history", t => {});
 test("history is modified on every successful move", t => {});
@@ -8,47 +52,534 @@ test("getHistory() returns the correct history in order", t => {});
 test("getHints() returns the correct hints if they exist", t => {});
 test("getHints() returns null if no hints exist", t => {});
 
-test("reset() returns all cards to the stock", t => {});
-test("reset() shuffles all cards after they are in th stock", t => {});
+test("reset() returns all cards to the stock", t => {
+  const game = new KlondikeGame();
+
+  game.reset();
+
+  t.is(game.stock.getCards().length, 52);
+});
+
+test("reset() shuffles all cards after they are in th stock", t => {
+  const game = new KlondikeGame();
+
+  let cardsInOrderCount = 0;
+
+  const deckInOrder = getSerializedDeck();
+
+  game.reset();
+
+  game.stock.getCards().forEach((card, i) => {
+    const equal = _.isEqual(card.serialize(), deckInOrder[i]);
+    if (equal) {
+      cardsInOrderCount += 1;
+    }
+  });
+
+  t.true(cardsInOrderCount < 10);
+});
 
 // initial game state
-test("Before the cards are dealt, they are shufled within the stock", t => {});
-test("7 tableau piles exist on the board", t => {});
-test("the first tableau pile has one card at the beginning", t => {});
-test("the second tableau pile has two cards at the beginning", t => {});
-test("the third tableau pile has three cards at the beginning", t => {});
-test("the fourth tableau pile has fourth cards at the beginning", t => {});
-test("the fifth tableau pile has five cards at the beginning", t => {});
-test("the sixth tableau pile has six cards at the beginning", t => {});
-test("the seventh tableau pile has seven cards at the beginning", t => {});
-test("4 foundtion piles exist on the board", t => {});
-test("the foundation is empty at the beginning", t => {});
-test("the waste is empty at the beginning of the game", t => {});
-test("the stock has 24 cards in it the beginning", t => {});
-test("the tableau has a collective 28 cards in it the beginning", t => {});
-test("There are only 52 cards in the entire game state at any given time", t => {});
-test("once the stock has been all pushed into the waste, the next time a move is made from the stock to the waste, the cards should be moved over to the stock again and the waste should be empty", t => {});
+test("7 tableau piles exist on the board", t => {
+  const game = new KlondikeGame();
+  for (let i = 1; i <= 7; i += 1) {
+    t.true(game.tableau.getTableauPile(i) instanceof TableauPile);
+  }
+});
+test("each tableau pile has the correct amount of cards at the beginning (1 for the 1st, 2 for the 2nd, etc)", t => {
+  const game = new KlondikeGame();
+  for (let i = 1; i <= 7; i += 1) {
+    t.is(game.tableau.getTableauPile(i).getCards().length, i);
+  }
+});
+test("4 foundation piles exist on the board", t => {
+  const game = new KlondikeGame();
+  t.true(game.foundation.getPileForSuit("Clubs") instanceof FoundationPile);
+  t.true(game.foundation.getPileForSuit("Hearts") instanceof FoundationPile);
+  t.true(game.foundation.getPileForSuit("Spades") instanceof FoundationPile);
+  t.true(game.foundation.getPileForSuit("Diamonds") instanceof FoundationPile);
+});
 
-// validate move tests
-test("cannot move a non sequential card to the foundation", t => {});
-test("cannot move a card to the waste from the tableau", t => {});
-test("cannot move a card to the waste from the foundation", t => {});
-test("cannot move a card to the stock from the tableau", t => {});
-test("cannot move a card to the stock from the waste", t => {});
-test("cannot move a card to the stock from the foundation", t => {});
-test("cannot move a card between the stock <-> waste if there are no cards in either", t => {});
-test("cannot move more than one card from the stock to the foundation", t => {});
-test("cannot move more than one card from the stock to the tableau", t => {});
-test("cannot move more than one card from the foundation to the tableau", t => {});
+test("the foundation is empty at the beginning", t => {
+  const game = new KlondikeGame();
+  t.is(game.foundation.getPileForSuit("Clubs").getCards().length, 0);
+  t.is(game.foundation.getPileForSuit("Hearts").getCards().length, 0);
+  t.is(game.foundation.getPileForSuit("Spades").getCards().length, 0);
+  t.is(game.foundation.getPileForSuit("Diamonds").getCards().length, 0);
+});
+
+test("the waste is empty at the beginning of the game", t => {
+  const game = new KlondikeGame();
+  t.is(game.waste.getCards().length, 0);
+});
+
+test("the stock has 24 cards in it the beginning", t => {
+  const game = new KlondikeGame();
+  t.is(game.stock.getCards().length, 24);
+});
+
+test("once the stock has been all pushed into the waste, the next time a move is made from the stock to the waste, the cards should be moved over to the stock again and the waste should be empty", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.waste.cards.push({
+    suit: "Clubs",
+    rank: "Ace",
+    upturned: true
+  });
+
+  gameState.stock.cards.push({
+    suit: "Hearts",
+    rank: "Queen",
+    upturned: false
+  });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  // now the stock is empty
+  game.draw();
+  t.is(game.waste.getCards().length, 2);
+  t.is(game.stock.getCards().length, 0);
+
+  // all the cards should be moved back into the stock
+  game.draw();
+
+  t.is(game.stock.getCards().length, 2);
+  t.is(game.waste.getCards().length, 0);
+
+  // the first card should be put into the waste
+  game.draw();
+
+  t.is(game.stock.getCards().length, 1);
+  t.is(game.waste.getCards().length, 1);
+});
+
+test("cannot move a card to the waste from the tableau", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.tableau.piles[0].cards.push({
+    suit: "Clubs",
+    rank: "Ace",
+    upturned: true
+  });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const canMakeMove = game.validateMove({
+    from: "tableau",
+    to: "waste",
+    cards: [Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })],
+    meta: {
+      fromPile: 1
+    }
+  });
+
+  t.false(canMakeMove);
+});
+
+test("cannot move a card to the waste from the foundation", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.foundation.clubs.cards.push({
+    suit: "Clubs",
+    rank: "Ace",
+    upturned: true
+  });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const canMakeMove = game.validateMove({
+    from: "foundation",
+    to: "waste",
+    cards: [Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })]
+  });
+
+  t.false(canMakeMove);
+});
+
+test("cannot move a card to the stock from the tableau", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.tableau.piles[0].cards.push({
+    suit: "Clubs",
+    rank: "Ace",
+    upturned: true
+  });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const canMakeMove = game.validateMove({
+    from: "tableau",
+    to: "stock",
+    cards: [Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })],
+    meta: {
+      fromPile: 1
+    }
+  });
+
+  t.false(canMakeMove);
+});
+
+test("cannot move a card to the stock from the waste", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.waste.cards.push({ suit: "Clubs", rank: "Ace", upturned: true });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const canMakeMove = game.validateMove({
+    from: "waste",
+    to: "stock",
+    cards: [Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })]
+  });
+
+  t.false(canMakeMove);
+});
+
+test("cannot move a card to the stock from the foundation", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.stock.cards.push({ suit: "Clubs", rank: "Ace", upturned: true });
+
+  gameState.foundation.clubs.cards.push({
+    suit: "Clubs",
+    rank: "2",
+    upturned: true
+  });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const canMakeMove = game.validateMove({
+    from: "foundation",
+    to: "stock",
+    cards: [
+      Card.unserialize({
+        suit: "Clubs",
+        rank: "2",
+        upturned: true
+      })
+    ]
+  });
+
+  t.false(canMakeMove);
+});
+
+test("cannot move more than one card from the stock to the foundation", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.stock.cards.push(
+    { suit: "Clubs", rank: "2", upturned: false },
+    { suit: "Clubs", rank: "Ace", upturned: true }
+  );
+  gameState.foundation.clubs.cards.push({
+    suit: "Clubs",
+    rank: "3",
+    upturned: true
+  });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const canMakeMove = game.validateMove({
+    from: "stock",
+    to: "foundation",
+    cards: [
+      Card.unserialize({ suit: "Clubs", rank: "2", upturned: false }),
+      Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })
+    ]
+  });
+
+  t.false(canMakeMove);
+});
+
+test("cannot move more than one card from the stock to the tableau", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.stock.cards.push(
+    { suit: "Clubs", rank: "2", upturned: false },
+    { suit: "Clubs", rank: "Ace", upturned: true }
+  );
+  gameState.tableau.piles[0].cards.push({
+    suit: "Hearts",
+    rank: "3",
+    upturned: true
+  });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const canMakeMove = game.validateMove({
+    from: "stock",
+    to: "tableau",
+    cards: [
+      Card.unserialize({ suit: "Clubs", rank: "2", upturned: false }),
+      Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })
+    ],
+    meta: {
+      toPile: 1
+    }
+  });
+
+  t.false(canMakeMove);
+});
+
+test("cannot move more than one card from the foundation to the tableau", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.foundation.clubs.cards.push(
+    { suit: "Clubs", rank: "2", upturned: true },
+    { suit: "Clubs", rank: "Ace", upturned: true }
+  );
+  gameState.tableau.piles[0].cards.push({
+    suit: "Hearts",
+    rank: "3",
+    upturned: true
+  });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const canMakeMove = game.validateMove({
+    from: "foundation",
+    to: "tableau",
+    cards: [
+      Card.unserialize({ suit: "Clubs", rank: "2", upturned: true }),
+      Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })
+    ],
+    meta: {
+      toPile: 1
+    }
+  });
+
+  t.false(canMakeMove);
+});
 
 // card moving tests
-test("can move a card from the stock to the waste", t => {});
-test("can move a card from the waste to the tableau", t => {});
-test("can move a card from the waste to the foundation", t => {});
-test("can move a card from the tableau to the foundation", t => {});
-test("can move a card from the tableau to the tableau", t => {});
-test("can move multiple cards from the tableau to the tableau", t => {});
-test("can move a card from the foundation to the tableau", t => {});
+test("can move a card from the stock to the waste", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.stock.cards.push({ suit: "Hearts", rank: "King", upturned: true });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const move: IMove = {
+    cards: [Card.unserialize({ suit: "Hearts", rank: "King", upturned: true })],
+    from: "stock",
+    to: "waste"
+  };
+
+  const canMakeMove = game.validateMove(move);
+
+  t.true(canMakeMove);
+
+  game.makeMove(move);
+
+  t.deepEqual(
+    game.waste.getCards()[0],
+    Card.unserialize({ suit: "Hearts", rank: "King", upturned: true })
+  );
+});
+
+test("can move a card from the waste to the tableau", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.waste.cards.push({ suit: "Hearts", rank: "King", upturned: true });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const move: IMove = {
+    cards: [Card.unserialize({ suit: "Hearts", rank: "King", upturned: true })],
+    from: "waste",
+    to: "tableau",
+    meta: {
+      toPile: 1
+    }
+  };
+
+  const canMakeMove = game.validateMove(move);
+
+  t.true(canMakeMove);
+
+  game.makeMove(move);
+
+  t.deepEqual(
+    game.tableau.getTableauPile(1).getCards()[0],
+    Card.unserialize({ suit: "Hearts", rank: "King", upturned: true })
+  );
+});
+
+test("can move a card from the waste to the foundation", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.waste.cards.push({ suit: "Hearts", rank: "Ace", upturned: true });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const move: IMove = {
+    cards: [Card.unserialize({ suit: "Hearts", rank: "Ace", upturned: true })],
+    from: "waste",
+    to: "foundation"
+  };
+
+  const canMakeMove = game.validateMove(move);
+
+  t.true(canMakeMove);
+
+  game.makeMove(move);
+
+  t.deepEqual(
+    game.foundation.getPileForSuit("Hearts").getCards()[0],
+    Card.unserialize({ suit: "Hearts", rank: "Ace", upturned: true })
+  );
+});
+
+test("can move a card from the tableau to the foundation", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.tableau.piles[0].cards.push({
+    suit: "Clubs",
+    rank: "Ace",
+    upturned: true
+  });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const move: IMove = {
+    cards: [Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })],
+    from: "tableau",
+    to: "foundation",
+    meta: {
+      fromPile: 1
+    }
+  };
+
+  const canMakeMove = game.validateMove(move);
+
+  t.true(canMakeMove);
+
+  game.makeMove(move);
+
+  t.deepEqual(
+    game.foundation.getPileForSuit("Clubs").getCards()[0],
+    Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })
+  );
+});
+
+test("can move a card from the tableau to the tableau", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.tableau.piles[0].cards.push({
+    suit: "Clubs",
+    rank: "5",
+    upturned: true
+  });
+  gameState.tableau.piles[1].cards.push({
+    suit: "Hearts",
+    rank: "6",
+    upturned: true
+  });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const move: IMove = {
+    cards: [Card.unserialize({ suit: "Clubs", rank: "5", upturned: true })],
+    from: "tableau",
+    to: "tableau",
+    meta: {
+      fromPile: 1,
+      toPile: 2
+    }
+  };
+
+  const canMakeMove = game.validateMove(move);
+
+  t.true(canMakeMove);
+
+  game.makeMove(move);
+
+  t.deepEqual(
+    game.tableau.getTableauPile(2).getCards()[1],
+    Card.unserialize({ suit: "Clubs", rank: "5", upturned: true })
+  );
+});
+
+test("can move multiple cards from the tableau to the tableau", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.tableau.piles[0].cards.push(
+    { suit: "Clubs", rank: "5", upturned: true },
+    { suit: "Hearts", rank: "4", upturned: true }
+  );
+  gameState.tableau.piles[1].cards.push({
+    suit: "Hearts",
+    rank: "6",
+    upturned: true
+  });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const move: IMove = {
+    cards: [
+      Card.unserialize({ suit: "Clubs", rank: "5", upturned: true }),
+      Card.unserialize({ suit: "Hearts", rank: "4", upturned: true })
+    ],
+    from: "tableau",
+    to: "tableau",
+    meta: {
+      fromPile: 1,
+      toPile: 2
+    }
+  };
+
+  const canMakeMove = game.validateMove(move);
+
+  t.true(canMakeMove);
+
+  game.makeMove(move);
+
+  t.deepEqual(
+    game.tableau.getTableauPile(2).getCards()[1],
+    Card.unserialize({ suit: "Clubs", rank: "5", upturned: true })
+  );
+  t.deepEqual(
+    game.tableau.getTableauPile(2).getCards()[2],
+    Card.unserialize({ suit: "Hearts", rank: "4", upturned: true })
+  );
+});
+
+test("can move a card from the foundation to the tableau", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.tableau.piles[0].cards.push({
+    suit: "Hearts",
+    rank: "4",
+    upturned: true
+  });
+  gameState.foundation.clubs.cards.push({
+    suit: "Clubs",
+    rank: "3",
+    upturned: true
+  });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const move: IMove = {
+    cards: [new Card("Clubs", "3", true)],
+    from: "foundation",
+    to: "tableau",
+    meta: {
+      fromPile: 1,
+      toPile: 1
+    }
+  };
+
+  const canMakeMove = game.validateMove(move);
+
+  t.true(canMakeMove);
+
+  game.makeMove(move);
+
+  t.deepEqual(
+    game.tableau.getTableauPile(1).getCards()[1],
+    new Card("Clubs", "3", true)
+  );
+});
 
 // unserialize and serialize
 test("unserializing the saved game state, puts it back in the same state", t => {
