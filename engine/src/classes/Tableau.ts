@@ -8,8 +8,6 @@ export interface ISerializedTableau {
 }
 
 export interface ITableau extends ISerializable<Tableau, ISerializedTableau> {
-  setPiles(piles: TableauPile[]): void;
-
   /** non zero based (e.g. pile 1 will return the first pile!) */
   getTableauPile(pileNumber: number): TableauPile;
 
@@ -28,8 +26,6 @@ export interface ITableau extends ISerializable<Tableau, ISerializedTableau> {
 
 export class Tableau implements ITableau {
   constructor(private piles: TableauPile[]) {}
-
-  public setPiles(piles: TableauPile[]): void {}
 
   /** non zero based (e.g. pile 1 will return the first pile!) */
   getTableauPile(pileNumber: number): TableauPile {

@@ -3,6 +3,7 @@ import { Pile, ISerializedPile } from "./Pile";
 import { Card } from "./Card";
 import { TSuit } from "../types/TSuit";
 import { FoundationPile, ISerializedFoundationPile } from "./FoundationPile";
+import * as _ from "lodash";
 
 export interface ISerializedFoundation {
   hearts: ISerializedFoundationPile;
@@ -31,7 +32,7 @@ export class Foundation implements IFoundation {
 
   addCard(card: Card): void {
     const suit = card.getSuit().toLowerCase();
-    const suitFoundationPileClass = this[suit] as Pile;
+    const suitFoundationPileClass = this[suit] as FoundationPile;
 
     if (!suitFoundationPileClass.canAddCards([card])) {
       return;
@@ -43,7 +44,7 @@ export class Foundation implements IFoundation {
   removeCard(card: Card): void {
     const suit = card.getSuit().toLowerCase();
 
-    const suitFoundationPileClass = this[suit] as Pile;
+    const suitFoundationPileClass = this[suit] as FoundationPile;
 
     if (!suitFoundationPileClass.canRemoveCards([card])) {
       return;
@@ -63,9 +64,12 @@ export class Foundation implements IFoundation {
 
   static unserialize(data: ISerializedFoundation) {
     const foundation = new Foundation();
-    Object.keys(data).forEach((suit: TSuit) => {
-      foundation[suit] = FoundationPile.unserialize({
-        cards: data[suit].cards,
+
+    const suits = Object.values(data).map(s => s.suit) as TSuit[];
+
+    suits.forEach((suit: TSuit) => {
+      foundation[suit.toLowerCase()] = FoundationPile.unserialize({
+        cards: data[suit.toLowerCase()].cards,
         suit: suit
       });
     });

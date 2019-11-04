@@ -52,48 +52,51 @@ test("getHistory() returns the correct history in order", t => {});
 test("getHints() returns the correct hints if they exist", t => {});
 test("getHints() returns null if no hints exist", t => {});
 
-test("reset() returns all cards to the stock", t => {
-  const game = new KlondikeGame();
+// test("reset() returns all cards to the stock", t => {
+//   const game = new KlondikeGame();
 
-  game.reset();
+//   game.reset();
 
-  t.is(game.stock.getCards().length, 52);
-});
+//   t.is(game.stock.getCards().length, 52);
+// });
 
-test("reset() shuffles all cards after they are in th stock", t => {
-  const game = new KlondikeGame();
+// test("reset() shuffles all cards after they are in th stock", t => {
+//   const game = new KlondikeGame();
 
-  let cardsInOrderCount = 0;
+//   let cardsInOrderCount = 0;
 
-  const deckInOrder = getSerializedDeck();
+//   const deckInOrder = getSerializedDeck();
 
-  game.reset();
+//   game.reset();
 
-  game.stock.getCards().forEach((card, i) => {
-    const equal = _.isEqual(card.serialize(), deckInOrder[i]);
-    if (equal) {
-      cardsInOrderCount += 1;
-    }
-  });
+//   game.stock.getCards().forEach((card, i) => {
+//     const equal = _.isEqual(card.serialize(), deckInOrder[i]);
+//     if (equal) {
+//       cardsInOrderCount += 1;
+//     }
+//   });
 
-  t.true(cardsInOrderCount < 10);
-});
+//   t.true(cardsInOrderCount < 10);
+// });
 
 // initial game state
 test("7 tableau piles exist on the board", t => {
   const game = new KlondikeGame();
+  game.deal();
   for (let i = 1; i <= 7; i += 1) {
     t.true(game.tableau.getTableauPile(i) instanceof TableauPile);
   }
 });
 test("each tableau pile has the correct amount of cards at the beginning (1 for the 1st, 2 for the 2nd, etc)", t => {
   const game = new KlondikeGame();
+  game.deal();
   for (let i = 1; i <= 7; i += 1) {
     t.is(game.tableau.getTableauPile(i).getCards().length, i);
   }
 });
 test("4 foundation piles exist on the board", t => {
   const game = new KlondikeGame();
+  game.deal();
   t.true(game.foundation.getPileForSuit("Clubs") instanceof FoundationPile);
   t.true(game.foundation.getPileForSuit("Hearts") instanceof FoundationPile);
   t.true(game.foundation.getPileForSuit("Spades") instanceof FoundationPile);
@@ -102,6 +105,7 @@ test("4 foundation piles exist on the board", t => {
 
 test("the foundation is empty at the beginning", t => {
   const game = new KlondikeGame();
+  game.deal();
   t.is(game.foundation.getPileForSuit("Clubs").getCards().length, 0);
   t.is(game.foundation.getPileForSuit("Hearts").getCards().length, 0);
   t.is(game.foundation.getPileForSuit("Spades").getCards().length, 0);
@@ -110,11 +114,13 @@ test("the foundation is empty at the beginning", t => {
 
 test("the waste is empty at the beginning of the game", t => {
   const game = new KlondikeGame();
+  game.deal();
   t.is(game.waste.getCards().length, 0);
 });
 
 test("the stock has 24 cards in it the beginning", t => {
   const game = new KlondikeGame();
+  game.deal();
   t.is(game.stock.getCards().length, 24);
 });
 
@@ -173,7 +179,7 @@ test("cannot move a card to the waste from the tableau", t => {
     }
   });
 
-  t.false(canMakeMove);
+  t.false(canMakeMove.valid);
 });
 
 test("cannot move a card to the waste from the foundation", t => {
@@ -193,7 +199,7 @@ test("cannot move a card to the waste from the foundation", t => {
     cards: [Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })]
   });
 
-  t.false(canMakeMove);
+  t.false(canMakeMove.valid);
 });
 
 test("cannot move a card to the stock from the tableau", t => {
@@ -209,6 +215,7 @@ test("cannot move a card to the stock from the tableau", t => {
 
   const canMakeMove = game.validateMove({
     from: "tableau",
+    // @ts-ignore
     to: "stock",
     cards: [Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })],
     meta: {
@@ -216,7 +223,7 @@ test("cannot move a card to the stock from the tableau", t => {
     }
   });
 
-  t.false(canMakeMove);
+  t.false(canMakeMove.valid);
 });
 
 test("cannot move a card to the stock from the waste", t => {
@@ -228,17 +235,18 @@ test("cannot move a card to the stock from the waste", t => {
 
   const canMakeMove = game.validateMove({
     from: "waste",
+    // @ts-ignore
     to: "stock",
     cards: [Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })]
   });
 
-  t.false(canMakeMove);
+  t.false(canMakeMove.valid);
 });
 
 test("cannot move a card to the stock from the foundation", t => {
   const gameState = getEmptySerializedGame();
 
-  gameState.stock.cards.push({ suit: "Clubs", rank: "Ace", upturned: true });
+  gameState.stock.cards.push({ suit: "Clubs", rank: "Ace", upturned: false });
 
   gameState.foundation.clubs.cards.push({
     suit: "Clubs",
@@ -250,6 +258,7 @@ test("cannot move a card to the stock from the foundation", t => {
 
   const canMakeMove = game.validateMove({
     from: "foundation",
+    // @ts-ignore
     to: "stock",
     cards: [
       Card.unserialize({
@@ -260,7 +269,7 @@ test("cannot move a card to the stock from the foundation", t => {
     ]
   });
 
-  t.false(canMakeMove);
+  t.false(canMakeMove.valid);
 });
 
 test("cannot move more than one card from the stock to the foundation", t => {
@@ -268,7 +277,7 @@ test("cannot move more than one card from the stock to the foundation", t => {
 
   gameState.stock.cards.push(
     { suit: "Clubs", rank: "2", upturned: false },
-    { suit: "Clubs", rank: "Ace", upturned: true }
+    { suit: "Clubs", rank: "Ace", upturned: false }
   );
   gameState.foundation.clubs.cards.push({
     suit: "Clubs",
@@ -287,7 +296,34 @@ test("cannot move more than one card from the stock to the foundation", t => {
     ]
   });
 
-  t.false(canMakeMove);
+  t.false(canMakeMove.valid);
+});
+
+test("cannot move more than one card from the waste", t => {
+  const gameState = getEmptySerializedGame();
+
+  gameState.waste.cards.push(
+    { suit: "Clubs", rank: "2", upturned: true },
+    { suit: "Clubs", rank: "Ace", upturned: true }
+  );
+  gameState.foundation.clubs.cards.push({
+    suit: "Clubs",
+    rank: "3",
+    upturned: true
+  });
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  const canMakeMove = game.validateMove({
+    from: "waste",
+    to: "foundation",
+    cards: [
+      Card.unserialize({ suit: "Clubs", rank: "2", upturned: true }),
+      Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })
+    ]
+  });
+
+  t.false(canMakeMove.valid);
 });
 
 test("cannot move more than one card from the stock to the tableau", t => {
@@ -295,7 +331,7 @@ test("cannot move more than one card from the stock to the tableau", t => {
 
   gameState.stock.cards.push(
     { suit: "Clubs", rank: "2", upturned: false },
-    { suit: "Clubs", rank: "Ace", upturned: true }
+    { suit: "Clubs", rank: "Ace", upturned: false }
   );
   gameState.tableau.piles[0].cards.push({
     suit: "Hearts",
@@ -317,7 +353,7 @@ test("cannot move more than one card from the stock to the tableau", t => {
     }
   });
 
-  t.false(canMakeMove);
+  t.false(canMakeMove.valid);
 });
 
 test("cannot move more than one card from the foundation to the tableau", t => {
@@ -347,34 +383,36 @@ test("cannot move more than one card from the foundation to the tableau", t => {
     }
   });
 
-  t.false(canMakeMove);
+  t.false(canMakeMove.valid);
 });
 
 // card moving tests
-test("can move a card from the stock to the waste", t => {
-  const gameState = getEmptySerializedGame();
 
-  gameState.stock.cards.push({ suit: "Hearts", rank: "King", upturned: true });
+// rewrite, as this a draw, not a move
+// test("can move a card from the stock to the waste", t => {
+//   const gameState = getEmptySerializedGame();
 
-  const game = KlondikeGame.unserialize(gameState);
+//   gameState.stock.cards.push({ suit: "Hearts", rank: "King", upturned: false });
 
-  const move: IMove = {
-    cards: [Card.unserialize({ suit: "Hearts", rank: "King", upturned: true })],
-    from: "stock",
-    to: "waste"
-  };
+//   const game = KlondikeGame.unserialize(gameState);
 
-  const canMakeMove = game.validateMove(move);
+//   const move: IMove = {
+//     cards: [Card.unserialize({ suit: "Hearts", rank: "King", upturned: true })],
+//     from: "stock",
+//     to: "waste"
+//   };
 
-  t.true(canMakeMove);
+//   const canMakeMove = game.validateMove(move);
 
-  game.makeMove(move);
+//   t.true(canMakeMove.valid);
 
-  t.deepEqual(
-    game.waste.getCards()[0],
-    Card.unserialize({ suit: "Hearts", rank: "King", upturned: true })
-  );
-});
+//   game.makeMove(move);
+
+//   t.deepEqual(
+//     game.waste.getCards()[0],
+//     Card.unserialize({ suit: "Hearts", rank: "King", upturned: true })
+//   );
+// });
 
 test("can move a card from the waste to the tableau", t => {
   const gameState = getEmptySerializedGame();
@@ -394,7 +432,7 @@ test("can move a card from the waste to the tableau", t => {
 
   const canMakeMove = game.validateMove(move);
 
-  t.true(canMakeMove);
+  t.true(canMakeMove.valid);
 
   game.makeMove(move);
 
@@ -419,7 +457,7 @@ test("can move a card from the waste to the foundation", t => {
 
   const canMakeMove = game.validateMove(move);
 
-  t.true(canMakeMove);
+  t.true(canMakeMove.valid);
 
   game.makeMove(move);
 
@@ -451,7 +489,7 @@ test("can move a card from the tableau to the foundation", t => {
 
   const canMakeMove = game.validateMove(move);
 
-  t.true(canMakeMove);
+  t.true(canMakeMove.valid);
 
   game.makeMove(move);
 
@@ -489,7 +527,7 @@ test("can move a card from the tableau to the tableau", t => {
 
   const canMakeMove = game.validateMove(move);
 
-  t.true(canMakeMove);
+  t.true(canMakeMove.valid);
 
   game.makeMove(move);
 
@@ -529,7 +567,7 @@ test("can move multiple cards from the tableau to the tableau", t => {
 
   const canMakeMove = game.validateMove(move);
 
-  t.true(canMakeMove);
+  t.true(canMakeMove.valid);
 
   game.makeMove(move);
 
@@ -564,14 +602,13 @@ test("can move a card from the foundation to the tableau", t => {
     from: "foundation",
     to: "tableau",
     meta: {
-      fromPile: 1,
       toPile: 1
     }
   };
 
   const canMakeMove = game.validateMove(move);
 
-  t.true(canMakeMove);
+  t.true(canMakeMove.valid);
 
   game.makeMove(move);
 
