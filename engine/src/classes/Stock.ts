@@ -20,7 +20,7 @@ export class Stock extends Pile implements IStock {
     super(cards);
   }
 
-  static unserialize({ cards }) {
+  static unserialize({ cards }: ISerializedStock) {
     const unserializedCards = cards.map(c => Card.unserialize(c));
     return new Stock(unserializedCards);
   }

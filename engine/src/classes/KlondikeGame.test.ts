@@ -891,7 +891,9 @@ test("unserializing the saved game state, puts it back in the same state", t => 
 
   // validate the foundation
   Object.keys(serializedGame.foundation).forEach((suit, i) => {
+    // @ts-ignore
     serializedGame.foundation[suit].cards.forEach((card, j) => {
+      // @ts-ignore
       t.deepEqual(card, game.foundation.serialize()[suit].cards[j]);
     });
   });

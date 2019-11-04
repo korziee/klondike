@@ -14,7 +14,7 @@ export class Waste extends Pile implements IWaste {
     }
   }
 
-  static unserialize({ cards }): Waste {
+  static unserialize({ cards }: ISerializedWaste): Waste {
     const unserializedCards = cards.map(c => Card.unserialize(c));
     return new Waste(unserializedCards);
   }

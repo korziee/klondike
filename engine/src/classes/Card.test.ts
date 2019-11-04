@@ -2,7 +2,7 @@ import test from "ava";
 import { Card } from "./Card";
 
 test("Can instanstiate the constructor", t => {
-  new Card("Clubs", "1", false);
+  new Card("Clubs", "Ace", false);
   t.pass();
 });
 

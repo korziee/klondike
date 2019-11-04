@@ -26,25 +26,28 @@ export class Foundation implements IFoundation {
   private clubs: FoundationPile = new FoundationPile("Clubs");
 
   getPileForSuit(suit: TSuit): FoundationPile {
-    const suitFoundationPileClass = this[suit.toLowerCase()] as FoundationPile;
-    return suitFoundationPileClass;
+    switch (suit) {
+      case "Clubs":
+        return this.clubs;
+      case "Diamonds":
+        return this.diamonds;
+      case "Hearts":
+        return this.hearts;
+      case "Spades":
+        return this.spades;
+    }
   }
 
   addCard(card: Card): void {
-    const suit = card.getSuit().toLowerCase();
-    const suitFoundationPileClass = this[suit] as FoundationPile;
-
-    if (!suitFoundationPileClass.canAddCards([card])) {
+    if (!this.getPileForSuit(card.getSuit()).canAddCards([card])) {
       return;
     }
 
-    suitFoundationPileClass.addCards([card]);
+    this.getPileForSuit(card.getSuit()).addCards([card]);
   }
 
   removeCard(card: Card): void {
-    const suit = card.getSuit().toLowerCase();
-
-    const suitFoundationPileClass = this[suit] as FoundationPile;
+    const suitFoundationPileClass = this.getPileForSuit(card.getSuit());
 
     if (!suitFoundationPileClass.canRemoveCards([card])) {
       return;
@@ -65,13 +68,24 @@ export class Foundation implements IFoundation {
   static unserialize(data: ISerializedFoundation) {
     const foundation = new Foundation();
 
-    const suits = Object.values(data).map(s => s.suit) as TSuit[];
+    foundation.spades = FoundationPile.unserialize({
+      cards: data.spades.cards,
+      suit: data.spades.suit
+    });
 
-    suits.forEach((suit: TSuit) => {
-      foundation[suit.toLowerCase()] = FoundationPile.unserialize({
-        cards: data[suit.toLowerCase()].cards,
-        suit: suit
-      });
+    foundation.hearts = FoundationPile.unserialize({
+      cards: data.hearts.cards,
+      suit: data.hearts.suit
+    });
+
+    foundation.clubs = FoundationPile.unserialize({
+      cards: data.clubs.cards,
+      suit: data.clubs.suit
+    });
+
+    foundation.diamonds = FoundationPile.unserialize({
+      cards: data.diamonds.cards,
+      suit: data.diamonds.suit
     });
 
     return foundation;

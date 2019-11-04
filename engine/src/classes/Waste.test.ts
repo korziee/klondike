@@ -80,10 +80,12 @@ test("serialize() returns the correct data", t => {
 });
 
 test("unserialize() returns an instance of Waste ", t => {
-  const cards = getRandomCards(10).map(c => {
-    c.turnUp();
-    return c;
-  });
+  const cards = getRandomCards(10)
+    .map(c => {
+      c.turnUp();
+      return c;
+    })
+    .map(c => c.serialize());
   const waste = Waste.unserialize({ cards });
   t.true(waste instanceof Waste);
 });
