@@ -55,16 +55,5 @@ export default {
     <div style={{ maxWidth: "200px" }}>
       <CardPile cards={cards} fanned fanDirection="down" />
     </div>
-  ),
-  Multiple: () => {
-    return (
-      <div style={{ display: "flex" }}>
-        <CardPile cards={cards} fanned fanDirection="down" />
-        <CardPile cards={cards} fanned fanDirection="down" />
-        <CardPile cards={cards} fanned fanDirection="down" />
-        <CardPile cards={cards} fanned fanDirection="down" />
-        <CardPile cards={cards} fanned fanDirection="down" />
-      </div>
-    );
-  }
+  )
 };
