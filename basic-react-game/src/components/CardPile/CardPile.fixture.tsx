@@ -1,15 +1,38 @@
 import React from "react";
-import { CardPile } from "./CardPile";
+import { CardPile, ICardPileCard } from "./CardPile";
 import { Card } from "engine/lib/classes/Card";
 
-const cards = [
-  new Card("Clubs", "3", false),
-  new Card("Clubs", "3", false),
-  new Card("Clubs", "3", false),
-  new Card("Clubs", "3", true),
-  new Card("Clubs", "3", true),
-  new Card("Clubs", "4", true),
-  new Card("Clubs", "5", true)
+const cards: ICardPileCard[] = [
+  {
+    card: new Card("Clubs", "3", false),
+    onClick: () => console.log("3 of clubs clicked"),
+    selected: false
+  },
+  {
+    card: new Card("Clubs", "5", false),
+    onClick: () => console.log("5 of clubs clicked"),
+    selected: false
+  },
+  {
+    card: new Card("Clubs", "6", true),
+    onClick: () => console.log("6 of clubs clicked"),
+    selected: false
+  },
+  {
+    card: new Card("Clubs", "7", true),
+    onClick: () => console.log("7 of clubs clicked"),
+    selected: false
+  },
+  {
+    card: new Card("Clubs", "8", true),
+    onClick: () => console.log("8 of clubs clicked"),
+    selected: true
+  },
+  {
+    card: new Card("Clubs", "King", true),
+    onClick: () => console.log("King of clubs clicked"),
+    selected: false
+  }
 ];
 
 export default {

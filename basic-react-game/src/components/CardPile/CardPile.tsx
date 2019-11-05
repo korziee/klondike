@@ -1,23 +1,19 @@
-import React, { useRef } from "react";
-import { Card } from "engine/lib/classes/Card";
+import React, { useMemo } from "react";
 import "./CardPile.css";
+
+import { Card } from "engine/lib/classes/Card";
 import { GameCard } from "../GameCard";
 
-// @ts-ignore
 import useDimensions from "react-use-dimensions";
-// CardPile
-// - Name: <CardPile />
-// - Constraints:
-//     - If no cards, it should be made evident that it is empty
-// - Props:
-//     - cards: ICard[]; // this is ordered!, the last item on the stack is what is rendered
-//     - fanned: boolean; // if true, the cards are fanned downwards
-//     - fanDirection: “down” | “right” | “left”; // describes which way the cards should fan when stacked
-// - Description:
-//     - Displays a pile of cards, if fanned, will fan it the prescribed direction
+
+export interface ICardPileCard {
+  card: Card;
+  onClick: () => void;
+  selected: boolean;
+}
 
 export interface ICardPileProps {
-  cards: Card[];
+  cards: ICardPileCard[];
   fanned: boolean;
   /**
    * If fanned is true, a direction must be selected
@@ -55,7 +51,7 @@ export const CardPile: React.FC<ICardPileProps> = ({
         }
         return (
           <div className="card" style={style}>
-            <GameCard card={c} onClick={console.log} selected={false} />
+            <GameCard card={c.card} onClick={c.onClick} selected={c.selected} />
           </div>
         );
       })}
