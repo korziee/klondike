@@ -2,3 +2,13 @@
   height: 100%;
   width: 100%;
 }
+
+/* Bit of a hack */
+.GameCard.-selected svg > rect {
+  stroke: #03a9f4;
+  stroke-width: 5px;
+}
+
+.GameCard.-hasOnClick:hover {
+  cursor: pointer;
+}

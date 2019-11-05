@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, MouseEvent } from "react";
 import "./GameCard.css";
 
 import { Card } from "engine/lib/classes/Card";
@@ -63,13 +63,19 @@ import { ReactComponent as QueenOfSpades } from "../../svgs/QS.svg";
 
 export interface IGameCardProps {
   card: Card;
+  selected: boolean;
+  onClick: () => void;
 }
 
 /**
  * This component renders a playing card onto the screen, what is shown is dependent on the card prop
  * The GameCard is the building block for any component that uses cards within it's UI.
  */
-export const GameCard: React.FC<IGameCardProps> = ({ card }) => {
+export const GameCard: React.FC<IGameCardProps> = ({
+  card,
+  onClick,
+  selected
+}) => {
   const getCard = () => {
     if (card.getUpturned() === false) {
       return <BlackBlank />;
@@ -202,5 +208,22 @@ export const GameCard: React.FC<IGameCardProps> = ({ card }) => {
     }
   };
 
-  return <div className="GameCard">{getCard()}</div>;
+  const onClickNoProgation = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      event.stopPropagation();
+      onClick();
+    },
+    [onClick]
+  );
+
+  return (
+    <div
+      className={`GameCard ${selected ? "-selected" : ""} ${
+        typeof onClick !== "undefined" ? "-hasOnClick" : ""
+      }`}
+      onClick={onClickNoProgation}
+    >
+      {getCard()}
+    </div>
+  );
 };
