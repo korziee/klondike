@@ -1,6 +1,5 @@
 import { ISerializedCard } from "../classes/Card";
 
-// TODO - test
 /**
  * Returns all card in a deck in their serialized form
  */

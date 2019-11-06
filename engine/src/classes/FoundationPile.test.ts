@@ -88,8 +88,6 @@ test("Cannot remove a card that is not on the top of the pile", t => {
   t.is(foundationPile.getCards().length, 5);
 });
 
-// TODO - actually test removing smh
-
 test("serialize returns correct suit", t => {
   const foundationPile = new FoundationPile("Clubs");
   foundationPile.addCards([
@@ -127,7 +125,6 @@ test("serialize returns the correct cards", t => {
   const serialized = foundationPile.serialize();
 
   const exists = serialized.cards.every(card => {
-    // TODO - replace with deep equal
     const existsInArray = cards.find(c => card.rank === c.rank);
     return typeof existsInArray !== "undefined";
   });
@@ -160,7 +157,6 @@ test("serialize returns the correct cards in the correct order", t => {
   const serialized = foundationPile.serialize();
 
   const allAreInOrder = serialized.cards.every((card, i) => {
-    // TODO - replace with deep equal
     return cards[i].rank === card.rank;
   });
 

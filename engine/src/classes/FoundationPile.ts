@@ -28,8 +28,6 @@ export class FoundationPile extends Pile {
     cards,
     suit
   }: ISerializedFoundationPile): FoundationPile {
-    // this all feels a bit hacky hmmm
-    // and requires a lot of knowledge about the abstraction layer
     const pile = super.unserialize({ cards });
     const foundationPile = new FoundationPile(suit);
     foundationPile.setCards(pile.getCards());

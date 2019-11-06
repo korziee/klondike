@@ -47,7 +47,6 @@ const getUniqueCards = (amount: number): Card[] => {
   if (amount > 52) {
     throw new Error("cannot generate more than 52 unique cards");
   }
-  // TODO - fix shuffle
   const shuffledDeck = _.shuffle(getDeckOfCards());
   return shuffledDeck.slice(0, amount);
 };
@@ -125,6 +124,42 @@ test("removeCards() removes the correct amount of cards", t => {
   pile.removeCards([cards[10], cards[20], cards[30], cards[40]]);
 
   t.is(pile.getCards().length, 46);
+});
+
+test("removeCards() returns a true if the removal was achieved", t => {
+  const cards = getUniqueCards(50);
+
+  const pile = getPileForTesting(cards);
+
+  const didRemove = pile.removeCards([
+    cards[10],
+    cards[20],
+    cards[30],
+    cards[40]
+  ]);
+
+  t.is(pile.getCards().length, 46);
+  t.true(didRemove);
+});
+
+test("removeCards() returns false if the removal was unsuccesful", t => {
+  const cards = getUniqueCards(50);
+
+  class PileWithFailingValidation extends Pile {
+    canRemoveCards() {
+      return false;
+    }
+  }
+
+  const pile = new PileWithFailingValidation(cards);
+
+  const didRemove = pile.removeCards([
+    cards[10],
+    cards[20],
+    cards[30],
+    cards[40]
+  ]);
+  t.false(didRemove);
 });
 
 test("removeCards() ignores the 'upturned' state of a Card", t => {

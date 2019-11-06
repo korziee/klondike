@@ -11,7 +11,7 @@ export interface IPile extends ISerializable<Pile, ISerializedPile> {
   getCards(): Card[];
   setCards(cards: Card[]): void;
   addCards(cards: Card[]): void;
-  removeCards(cards: Card[]): void;
+  removeCards(cards: Card[]): boolean;
   clear(): Card[];
   shuffle(): void;
 
@@ -68,10 +68,10 @@ export class Pile implements IPile {
   /**
    * If the pile has duplicates, this will only the first card it finds on the stack (from the back)
    */
-  removeCards(cards: Card[]): void {
+  removeCards(cards: Card[]): boolean {
     if (!this.canRemoveCards(cards)) {
       console.warn("Remove cards validation failed");
-      return;
+      return false;
     }
 
     let cardsRemovedCount = 0;
@@ -94,6 +94,8 @@ export class Pile implements IPile {
         "An inequal amount of cards were removed, this likely means that the pile did not contain all of the cards that were asked to be removed"
       );
     }
+
+    return true;
   }
 
   clear(): Card[] {

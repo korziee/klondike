@@ -1,6 +1,5 @@
 import { TRank } from "../types/TRank";
 
-// TODO - test
 export const getNextRankForCurrentRank = (rank: TRank): TRank => {
   switch (rank) {
     case "Ace":

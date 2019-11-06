@@ -101,18 +101,16 @@ export class TableauPile extends Pile implements ITableauPile {
     this.turnUpTopCard();
   }
 
-  // TODO
-  // overwrite - this is a bit hacky as it calls canRemoveCards twice!
-  // the solution is to make the generic class Pile, return a boolean if it was successful
-  removeCards(cards: Card[]): void {
-    const canRemoveCards = this.canRemoveCards(cards);
-    super.removeCards(cards);
-    if (canRemoveCards) {
+  removeCards(cards: Card[]): boolean {
+    const cardsRemoved = super.removeCards(cards);
+
+    if (cardsRemoved) {
       this.turnUpTopCard();
     }
+
+    return cardsRemoved;
   }
 
-  // TODO - same boat as removeCards
   addCards(cards: Card[]) {
     const sortedCards = sortCardsBySequence(cards, "descending");
     super.addCards(sortedCards);

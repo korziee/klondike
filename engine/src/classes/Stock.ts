@@ -32,7 +32,10 @@ export class Stock extends Pile implements IStock {
   }
 
   canRemoveCards(cards: Card[]) {
-    // HACK - replace with actual logic
+    if (cards.length > 1) {
+      console.warn("cannot remove more than one card from the stock at a time");
+      return false;
+    }
     return true;
   }
 

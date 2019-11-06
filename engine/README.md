@@ -17,4 +17,3 @@ We are using the `"ts-node/register/transpile-only"` for ava, as we do not care 
 -- need to support magic moves (when a user double clicks a card, we should put it in the first valid spot)
 -- add hints
 -- refactor the pile and implemntations of pile to propogate error messages, as opposed to console logging them
--- fix all HACK's and TODO's in codebase

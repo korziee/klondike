@@ -73,8 +73,6 @@ export class KlondikeGame implements IKlondikeGame {
       return true;
     }
 
-    // TODO: might be nice to have a helper on pile that pops the card off the top of the stack
-    // as this will be a repeated pattern.
     const topOfStockCard = this.stock.getCards()[
       this.stock.getCards().length - 1
     ];
