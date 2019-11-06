@@ -59,6 +59,7 @@ export const GameHandler: React.FC = ({ children }) => {
   const [selectedCard, setSelectedCard] = useState<ISelectedCard | null>(null);
   const firstRenderCompleted = useFirstRenderCompleted();
 
+  // eslint-disable-next-line
   const [force, setForce] = React.useState<number>(0);
 
   const { current: game } = useRef(new KlondikeGame());
