@@ -80,7 +80,89 @@ test("getHistory() returns the correct history", t => {
 
   game.makeMove(move);
 
-  t.deepEqual(game.getHistory()[0], move);
+  t.deepEqual(game.getHistory()[0].move, move.serialize());
+});
+
+test.only("undo() moves the game state back one move", t => {
+  const serializedGame = getEmptySerializedGame();
+  serializedGame.tableau.piles[0].cards.push(
+    {
+      suit: "Clubs",
+      rank: "King",
+      upturned: true
+    },
+    {
+      suit: "Diamonds",
+      rank: "Queen",
+      upturned: true
+    }
+  );
+  serializedGame.tableau.piles[1].cards.push({
+    suit: "Spades",
+    rank: "King",
+    upturned: true
+  });
+  const game = KlondikeGame.unserialize(serializedGame);
+
+  const move = new Move({
+    from: "tableau",
+    to: "tableau",
+    cards: [new Card("Diamonds", "Queen", true)],
+    meta: {
+      fromPile: 1,
+      toPile: 2
+    }
+  });
+
+  game.makeMove(move);
+  game.undo();
+  t.deepEqual(
+    game.tableau
+      .getTableauPile(1)
+      .getCards()[1]
+      .serialize(),
+    {
+      suit: "Diamonds",
+      rank: "Queen",
+      upturned: true
+    }
+  );
+});
+
+test("undo() removes the last move from the history ", t => {
+  const serializedGame = getEmptySerializedGame();
+  serializedGame.tableau.piles[0].cards.push(
+    {
+      suit: "Clubs",
+      rank: "King",
+      upturned: true
+    },
+    {
+      suit: "Diamonds",
+      rank: "Queen",
+      upturned: true
+    }
+  );
+  serializedGame.tableau.piles[1].cards.push({
+    suit: "Spades",
+    rank: "King",
+    upturned: true
+  });
+  const game = KlondikeGame.unserialize(serializedGame);
+
+  const move = new Move({
+    from: "tableau",
+    to: "tableau",
+    cards: [new Card("Diamonds", "Queen", true)],
+    meta: {
+      fromPile: 1,
+      toPile: 2
+    }
+  });
+
+  game.makeMove(move);
+  game.undo();
+  t.is(game.history.length, 0);
 });
 
 test("history is cleared on reset", t => {
@@ -230,9 +312,9 @@ test("getHistory() returns the correct history in order", t => {
 
   game.makeMove(move);
 
-  t.deepEqual(game.getHistory()[0], move);
-  t.deepEqual(game.getHistory()[1], moveBack);
-  t.deepEqual(game.getHistory()[2], move);
+  t.deepEqual(game.getHistory()[0].move, move.serialize());
+  t.deepEqual(game.getHistory()[1].move, moveBack.serialize());
+  t.deepEqual(game.getHistory()[2].move, move.serialize());
 });
 
 // test("getHints() returns the correct hints if they exist", t => {});
@@ -963,18 +1045,22 @@ test("unserializing the saved game state, puts it back in the same state", t => 
     },
     history: [
       {
-        from: "tableau",
-        to: "tableau",
-        cards: [
-          {
-            rank: "10",
-            suit: "Spades",
-            upturned: true
+        // fix
+        state: {} as any,
+        move: {
+          from: "tableau",
+          to: "tableau",
+          cards: [
+            {
+              rank: "10",
+              suit: "Spades",
+              upturned: true
+            }
+          ],
+          meta: {
+            fromPile: 1,
+            toPile: 5
           }
-        ],
-        meta: {
-          fromPile: 1,
-          toPile: 5
         }
       }
     ],
@@ -1136,11 +1222,9 @@ test("unserializing the saved game state, puts it back in the same state", t => 
     });
   });
 
-  game.history
-    .map(m => m.serialize())
-    .forEach((m, i) => {
-      t.deepEqual(serializedGame.history[i], m);
-    });
+  game.history.forEach((m, i) => {
+    t.deepEqual(serializedGame.history[i].move, m.move);
+  });
 
   // validate the foundation
   Object.keys(serializedGame.foundation).forEach((suit, i) => {

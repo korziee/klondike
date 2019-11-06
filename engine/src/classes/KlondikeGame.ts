@@ -6,11 +6,16 @@ import { ISerializedWaste, Waste } from "./Waste";
 import { ISerializedStock, Stock } from "./Stock";
 import { TableauPile } from "./TableauPile";
 import { getSerializedDeck } from "../helpers/getSerializedDeck";
-import * as _ from "lodash";
 import { ISerializedMove, Move } from "./Move";
+import * as _ from "lodash";
+
+export interface IHistory {
+  move: ISerializedMove;
+  state: ISerializedKlondikeGame;
+}
 
 export interface ISerializedKlondikeGame {
-  history: ISerializedMove[];
+  history: IHistory[];
   tableau: ISerializedTableau;
   foundation: ISerializedFoundation;
   waste: ISerializedWaste;
@@ -25,17 +30,21 @@ export interface IMoveValidationResult {
 
 export interface IKlondikeGame
   extends ISerializable<KlondikeGame, ISerializedKlondikeGame> {
-  getHistory(): Move[];
+  getHistory(): IHistory[];
   getHints(): Move[] | null;
   validateMove(move: Move): IMoveValidationResult;
 
   // returns a boolean denoting whether or not an actual draw was made
   draw(): boolean;
 
+  // undo's the last move in the history!
+  undo(): void;
+
   makeMove(move: Move): void;
 
   deal(): void;
-  history: Move[];
+
+  history: IHistory[];
   tableau: Tableau;
   foundation: Foundation;
   waste: Waste;
@@ -43,11 +52,35 @@ export interface IKlondikeGame
 }
 
 export class KlondikeGame implements IKlondikeGame {
-  public history: Move[] = [];
+  public history: IHistory[] = [];
   public tableau: Tableau;
   public foundation: Foundation;
   public waste: Waste;
   public stock: Stock;
+
+  undo(): void {
+    // using history, we need to look at the last move, and set the state back using the ovveride `set` methods
+    if (this.history.length === 0) {
+      console.warn("cannot undo if there is no history");
+      return;
+    }
+
+    const lastMove = this.history[this.history.length - 1];
+
+    const {
+      foundation,
+      history,
+      stock,
+      tableau,
+      waste
+    } = KlondikeGame.unserialize(lastMove.state);
+
+    this.foundation = foundation;
+    this.stock = stock;
+    this.history = history;
+    this.tableau = tableau;
+    this.waste = waste;
+  }
 
   draw(): boolean {
     // if there are no cards in the stock or waste, we cannot draw
@@ -89,7 +122,7 @@ export class KlondikeGame implements IKlondikeGame {
   serialize(): ISerializedKlondikeGame {
     return {
       foundation: this.foundation.serialize(),
-      history: this.history.map(m => m.serialize()),
+      history: this.history,
       stock: this.stock.serialize(),
       tableau: this.tableau.serialize(),
       waste: this.waste.serialize()
@@ -101,7 +134,7 @@ export class KlondikeGame implements IKlondikeGame {
     game.tableau = Tableau.unserialize(serializedGame.tableau);
     game.waste = Waste.unserialize(serializedGame.waste);
     game.stock = Stock.unserialize(serializedGame.stock);
-    game.history = serializedGame.history.map(m => Move.unserialize(m));
+    game.history = serializedGame.history;
     return game;
   }
 
@@ -307,12 +340,17 @@ export class KlondikeGame implements IKlondikeGame {
     if (!moveValidation.valid) {
       return;
     }
+
+    this.history.push({
+      move: move.serialize(),
+      state: this.serialize()
+    });
+
     if (move.from === "foundation" && move.to === "tableau") {
       this.foundation
         .getPileForSuit(move.cards[0].getSuit())
         .removeCards(move.cards);
       this.tableau.getTableauPile(move.meta.toPile).addCards(move.cards);
-      this.history.push(move);
       return;
     }
     if (move.from === "waste") {
@@ -323,7 +361,6 @@ export class KlondikeGame implements IKlondikeGame {
       if (move.to === "foundation") {
         this.foundation.addCard(move.cards[0]);
       }
-      this.history.push(move);
       return;
     }
     if (move.from === "tableau") {
@@ -334,10 +371,10 @@ export class KlondikeGame implements IKlondikeGame {
       if (move.to === "foundation") {
         this.foundation.addCard(move.cards[0]);
       }
-      this.history.push(move);
       return;
     }
 
+    this.history.pop();
     throw Error("Unknown move!");
   }
 
@@ -345,7 +382,7 @@ export class KlondikeGame implements IKlondikeGame {
     return null;
   }
 
-  getHistory(): Move[] {
+  getHistory(): IHistory[] {
     return this.history;
   }
 }
