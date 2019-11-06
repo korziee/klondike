@@ -19,7 +19,6 @@ export const GameView: React.FC = () => {
 
   return (
     <div>
-      <button onClick={draw}>draw</button>
       <Row style={{ height: "250px" }}>
         <Col span={4} style={{ height: "100%" }}>
           <CardPile
