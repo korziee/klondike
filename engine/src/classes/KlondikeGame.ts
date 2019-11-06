@@ -156,6 +156,7 @@ export class KlondikeGame implements IKlondikeGame {
     this.foundation = new Foundation();
     this.waste = new Waste([]);
     this.stock = new Stock([]);
+    this.history = [];
   }
 
   validateMove(move: IMove): IMoveValidationResult {

@@ -82,6 +82,59 @@ test("getHistory() returns the correct history", t => {
   t.deepEqual(game.getHistory()[0], move);
 });
 
+test("history is cleared on reset", t => {
+  const serializedGame = getEmptySerializedGame();
+  serializedGame.tableau.piles[0].cards.push(
+    {
+      suit: "Clubs",
+      rank: "King",
+      upturned: true
+    },
+    {
+      suit: "Diamonds",
+      rank: "Queen",
+      upturned: true
+    }
+  );
+  serializedGame.tableau.piles[1].cards.push({
+    suit: "Spades",
+    rank: "King",
+    upturned: true
+  });
+  const game = KlondikeGame.unserialize(serializedGame);
+
+  const move: IMove = {
+    from: "tableau",
+    to: "tableau",
+    cards: [new Card("Diamonds", "Queen", true)],
+    meta: {
+      fromPile: 1,
+      toPile: 2
+    }
+  };
+
+  game.makeMove(move);
+
+  move.meta.fromPile = 2;
+  move.meta.toPile = 1;
+
+  game.makeMove(move);
+
+  move.meta.fromPile = 1;
+  move.meta.toPile = 2;
+
+  game.makeMove(move);
+
+  move.meta.fromPile = 2;
+  move.meta.toPile = 1;
+
+  t.is(game.getHistory().length, 3);
+
+  game._reset();
+
+  t.is(game.getHistory().length, 0);
+});
+
 test("history is modified on every successful move", t => {
   const serializedGame = getEmptySerializedGame();
   serializedGame.tableau.piles[0].cards.push(
