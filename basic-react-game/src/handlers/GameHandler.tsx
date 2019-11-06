@@ -3,6 +3,7 @@ import { KlondikeGame, Move } from "engine/lib/";
 import { ICardPileCard } from "../components/CardPile";
 import { Card } from "engine/lib/classes/Card";
 import { TSuit } from "engine/lib/types/TSuit";
+import { useKeyPress } from "../hooks/useKeyPress";
 
 // TODO - this card has not had any refactoring, just code thrown at it
 // alot of the move logic needs to be generecised and the methods and cards should be memoized as to not cause unnesccesary re-renders
@@ -59,18 +60,11 @@ export const GameHandler: React.FC = ({ children }) => {
   const [selectedCard, setSelectedCard] = useState<ISelectedCard | null>(null);
   const firstRenderCompleted = useFirstRenderCompleted();
 
-  useEffect(() => {
-    const eventHandler = (event: KeyboardEvent) => {
-      if (event.keyCode !== 27) {
-        return;
-      }
-      setSelectedCard(null);
-    };
-    window.addEventListener("keydown", eventHandler);
-    return () => {
-      window.removeEventListener("keydown", eventHandler);
-    };
-  }, []);
+  const escapePressed = useKeyPress("Escape");
+
+  if (escapePressed && selectedCard !== null) {
+    setSelectedCard(null);
+  }
 
   // eslint-disable-next-line
   const [force, setForce] = React.useState<number>(0);
