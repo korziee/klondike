@@ -1,4 +1,4 @@
-import test from "ava";
+import test, { serial } from "ava";
 import { KlondikeGame, ISerializedKlondikeGame, IMove } from "./KlondikeGame";
 import { Card } from "./Card";
 import { getSerializedDeck } from "../helpers/getSerializedDeck";
@@ -46,9 +46,141 @@ const getEmptySerializedGame = (): ISerializedKlondikeGame => ({
   }
 });
 
-test("getHistory() returns the correct history", t => {});
-test("history is modified on every successful move", t => {});
-test("getHistory() returns the correct history in order", t => {});
+test("getHistory() returns the correct history", t => {
+  const serializedGame = getEmptySerializedGame();
+  serializedGame.tableau.piles[0].cards.push(
+    {
+      suit: "Clubs",
+      rank: "10",
+      upturned: true
+    },
+    {
+      suit: "Diamonds",
+      rank: "9",
+      upturned: true
+    }
+  );
+  serializedGame.tableau.piles[1].cards.push({
+    suit: "Diamonds",
+    rank: "Jack",
+    upturned: true
+  });
+  const game = KlondikeGame.unserialize(serializedGame);
+
+  const move: IMove = {
+    from: "tableau",
+    to: "tableau",
+    cards: [new Card("Clubs", "10", true), new Card("Diamonds", "9", true)],
+    meta: {
+      fromPile: 1,
+      toPile: 2
+    }
+  };
+
+  game.makeMove(move);
+
+  t.deepEqual(game.getHistory()[0], move);
+});
+
+test("history is modified on every successful move", t => {
+  const serializedGame = getEmptySerializedGame();
+  serializedGame.tableau.piles[0].cards.push(
+    {
+      suit: "Clubs",
+      rank: "King",
+      upturned: true
+    },
+    {
+      suit: "Diamonds",
+      rank: "Queen",
+      upturned: true
+    }
+  );
+  serializedGame.tableau.piles[1].cards.push({
+    suit: "Spades",
+    rank: "King",
+    upturned: true
+  });
+  const game = KlondikeGame.unserialize(serializedGame);
+
+  const move: IMove = {
+    from: "tableau",
+    to: "tableau",
+    cards: [new Card("Diamonds", "Queen", true)],
+    meta: {
+      fromPile: 1,
+      toPile: 2
+    }
+  };
+
+  game.makeMove(move);
+
+  move.meta.fromPile = 2;
+  move.meta.toPile = 1;
+
+  game.makeMove(move);
+
+  move.meta.fromPile = 1;
+  move.meta.toPile = 2;
+
+  game.makeMove(move);
+
+  move.meta.fromPile = 2;
+  move.meta.toPile = 1;
+
+  t.is(game.getHistory().length, 3);
+});
+
+test("getHistory() returns the correct history in order", t => {
+  const serializedGame = getEmptySerializedGame();
+  serializedGame.tableau.piles[0].cards.push(
+    {
+      suit: "Clubs",
+      rank: "King",
+      upturned: true
+    },
+    {
+      suit: "Diamonds",
+      rank: "Queen",
+      upturned: true
+    }
+  );
+  serializedGame.tableau.piles[1].cards.push({
+    suit: "Spades",
+    rank: "King",
+    upturned: true
+  });
+  const game = KlondikeGame.unserialize(serializedGame);
+
+  const move: IMove = {
+    from: "tableau",
+    to: "tableau",
+    cards: [new Card("Diamonds", "Queen", true)],
+    meta: {
+      fromPile: 1,
+      toPile: 2
+    }
+  };
+
+  game.makeMove(move);
+
+  const moveBack: IMove = {
+    ...move,
+    meta: {
+      fromPile: 2,
+      toPile: 1
+    }
+  };
+
+  game.makeMove(moveBack);
+
+  game.makeMove(move);
+
+  t.deepEqual(game.getHistory()[0], move);
+  t.deepEqual(game.getHistory()[1], moveBack);
+  t.deepEqual(game.getHistory()[2], move);
+});
+
 test("getHints() returns the correct hints if they exist", t => {});
 test("getHints() returns null if no hints exist", t => {});
 
@@ -148,7 +280,6 @@ test("once the stock has been all pushed into the waste, the next time a move is
 
   // all the cards should be moved back into the stock
   game.draw();
-
   t.is(game.stock.getCards().length, 2);
   t.is(game.waste.getCards().length, 0);
 
@@ -157,6 +288,68 @@ test("once the stock has been all pushed into the waste, the next time a move is
 
   t.is(game.stock.getCards().length, 1);
   t.is(game.waste.getCards().length, 1);
+});
+
+test("after the stock is empty, and the waste has cards, the stock should be re-filled in the CORRECT order", t => {
+  const gameState = getEmptySerializedGame();
+
+  // gameState.waste.cards.push();
+
+  gameState.stock.cards.push(
+    {
+      suit: "Hearts",
+      rank: "Queen",
+      upturned: false
+    },
+    {
+      suit: "Clubs",
+      rank: "2",
+      upturned: false
+    },
+    {
+      suit: "Clubs",
+      rank: "Ace",
+      upturned: false
+    }
+  );
+
+  const game = KlondikeGame.unserialize(gameState);
+
+  t.deepEqual(game.stock.getCards()[2].serialize(), {
+    suit: "Clubs",
+    rank: "Ace",
+    upturned: false
+  });
+  game.draw();
+  // first card in should be the card that was at the top of the stock
+  t.deepEqual(game.waste.getCards()[0].serialize(), {
+    suit: "Clubs",
+    rank: "Ace",
+    upturned: true
+  });
+  game.draw();
+  game.draw();
+  // now the stock is empty
+  t.is(game.stock.getCards().length, 0);
+
+  // all the cards should be moved back into the stock
+  game.draw();
+  t.is(game.waste.getCards().length, 0);
+  t.is(game.stock.getCards().length, 3);
+
+  // the first card should be put into the waste, which should be the first card that was put in before!
+  game.draw();
+  t.deepEqual(game.waste.getCards()[0].serialize(), {
+    suit: "Clubs",
+    rank: "Ace",
+    upturned: true
+  });
+  game.draw();
+  t.deepEqual(game.waste.getCards()[1].serialize(), {
+    suit: "Clubs",
+    rank: "2",
+    upturned: true
+  });
 });
 
 test("cannot move a card to the waste from the tableau", t => {

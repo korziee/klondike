@@ -76,10 +76,12 @@ export class KlondikeGame implements IKlondikeGame {
     // stock is empty, we need to transfer all of the cards from the waste into the stock
     if (this.stock.getCards().length === 0) {
       const cardsInWaste = this.waste.getCards();
-      const cardsInWasteTurnedDown = cardsInWaste.map(c => {
-        c.turnDown();
-        return c;
-      });
+      const cardsInWasteTurnedDown = cardsInWaste
+        .map(c => {
+          c.turnDown();
+          return c;
+        })
+        .reverse(); // we reverse the cards because we have been pushing onto the stack in the stock
       this.waste.setCards([]);
       this.stock.setCards(cardsInWasteTurnedDown);
       // this was technically a move, so we return true
@@ -325,6 +327,7 @@ export class KlondikeGame implements IKlondikeGame {
         .getPileForSuit(move.cards[0].getSuit())
         .removeCards(move.cards);
       this.tableau.getTableauPile(move.meta.toPile).addCards(move.cards);
+      this.history.push(move);
       return;
     }
     if (move.from === "waste") {
@@ -335,6 +338,7 @@ export class KlondikeGame implements IKlondikeGame {
       if (move.to === "foundation") {
         this.foundation.addCard(move.cards[0]);
       }
+      this.history.push(move);
       return;
     }
     if (move.from === "tableau") {
@@ -345,6 +349,7 @@ export class KlondikeGame implements IKlondikeGame {
       if (move.to === "foundation") {
         this.foundation.addCard(move.cards[0]);
       }
+      this.history.push(move);
       return;
     }
 
@@ -356,6 +361,6 @@ export class KlondikeGame implements IKlondikeGame {
   }
 
   getHistory(): IMove[] {
-    return null;
+    return this.history;
   }
 }
