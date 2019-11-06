@@ -31,7 +31,7 @@ const isAlternating = (
     };
   }
 
-  if (Math.abs(cardANumericalRank - cardBNumericalRank) !== 1) {
+  if (cardANumericalRank - cardBNumericalRank !== 1) {
     return {
       ok: false,
       error: "cards are not alternating rank"
