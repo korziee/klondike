@@ -1,5 +1,5 @@
 import test, { serial } from "ava";
-import { KlondikeGame, ISerializedKlondikeGame, IMove } from "./KlondikeGame";
+import { KlondikeGame, ISerializedKlondikeGame } from "./KlondikeGame";
 import { Card } from "./Card";
 import { getSerializedDeck } from "../helpers/getSerializedDeck";
 import * as _ from "lodash";
@@ -68,7 +68,7 @@ test("getHistory() returns the correct history", t => {
   });
   const game = KlondikeGame.unserialize(serializedGame);
 
-  const move: IMove = {
+  const move = new Move({
     from: "tableau",
     to: "tableau",
     cards: [new Card("Clubs", "10", true), new Card("Diamonds", "9", true)],
@@ -76,7 +76,7 @@ test("getHistory() returns the correct history", t => {
       fromPile: 1,
       toPile: 2
     }
-  };
+  });
 
   game.makeMove(move);
 
@@ -104,7 +104,7 @@ test("history is cleared on reset", t => {
   });
   const game = KlondikeGame.unserialize(serializedGame);
 
-  const move: IMove = {
+  const move = new Move({
     from: "tableau",
     to: "tableau",
     cards: [new Card("Diamonds", "Queen", true)],
@@ -112,7 +112,7 @@ test("history is cleared on reset", t => {
       fromPile: 1,
       toPile: 2
     }
-  };
+  });
 
   game.makeMove(move);
 
@@ -157,7 +157,7 @@ test("history is modified on every successful move", t => {
   });
   const game = KlondikeGame.unserialize(serializedGame);
 
-  const move: IMove = {
+  const move = new Move({
     from: "tableau",
     to: "tableau",
     cards: [new Card("Diamonds", "Queen", true)],
@@ -165,7 +165,7 @@ test("history is modified on every successful move", t => {
       fromPile: 1,
       toPile: 2
     }
-  };
+  });
 
   game.makeMove(move);
 
@@ -206,7 +206,7 @@ test("getHistory() returns the correct history in order", t => {
   });
   const game = KlondikeGame.unserialize(serializedGame);
 
-  const move: IMove = {
+  const move = new Move({
     from: "tableau",
     to: "tableau",
     cards: [new Card("Diamonds", "Queen", true)],
@@ -214,17 +214,17 @@ test("getHistory() returns the correct history in order", t => {
       fromPile: 1,
       toPile: 2
     }
-  };
+  });
 
   game.makeMove(move);
 
-  const moveBack: IMove = {
+  const moveBack = new Move({
     ...move,
     meta: {
       fromPile: 2,
       toPile: 1
     }
-  };
+  });
 
   game.makeMove(moveBack);
 
@@ -652,14 +652,14 @@ test("can move a card from the waste to the tableau", t => {
 
   const game = KlondikeGame.unserialize(gameState);
 
-  const move: IMove = {
+  const move = new Move({
     cards: [Card.unserialize({ suit: "Hearts", rank: "King", upturned: true })],
     from: "waste",
     to: "tableau",
     meta: {
       toPile: 1
     }
-  };
+  });
 
   const canMakeMove = game.validateMove(move);
 
@@ -680,11 +680,11 @@ test("can move a card from the waste to the foundation", t => {
 
   const game = KlondikeGame.unserialize(gameState);
 
-  const move: IMove = {
+  const move = new Move({
     cards: [Card.unserialize({ suit: "Hearts", rank: "Ace", upturned: true })],
     from: "waste",
     to: "foundation"
-  };
+  });
 
   const canMakeMove = game.validateMove(move);
 
@@ -709,14 +709,14 @@ test("can move a card from the tableau to the foundation", t => {
 
   const game = KlondikeGame.unserialize(gameState);
 
-  const move: IMove = {
+  const move = new Move({
     cards: [Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })],
     from: "tableau",
     to: "foundation",
     meta: {
       fromPile: 1
     }
-  };
+  });
 
   const canMakeMove = game.validateMove(move);
 
@@ -746,7 +746,7 @@ test("can move a card from the tableau to the tableau", t => {
 
   const game = KlondikeGame.unserialize(gameState);
 
-  const move: IMove = {
+  const move = new Move({
     cards: [Card.unserialize({ suit: "Clubs", rank: "5", upturned: true })],
     from: "tableau",
     to: "tableau",
@@ -754,7 +754,7 @@ test("can move a card from the tableau to the tableau", t => {
       fromPile: 1,
       toPile: 2
     }
-  };
+  });
 
   const canMakeMove = game.validateMove(move);
 
@@ -783,7 +783,7 @@ test("can move multiple cards from the tableau to the tableau", t => {
 
   const game = KlondikeGame.unserialize(gameState);
 
-  const move: IMove = {
+  const move = new Move({
     cards: [
       Card.unserialize({ suit: "Clubs", rank: "5", upturned: true }),
       Card.unserialize({ suit: "Hearts", rank: "4", upturned: true })
@@ -794,7 +794,7 @@ test("can move multiple cards from the tableau to the tableau", t => {
       fromPile: 1,
       toPile: 2
     }
-  };
+  });
 
   const canMakeMove = game.validateMove(move);
 
@@ -828,14 +828,14 @@ test("can move a card from the foundation to the tableau", t => {
 
   const game = KlondikeGame.unserialize(gameState);
 
-  const move: IMove = {
+  const move = new Move({
     cards: [new Card("Clubs", "3", true)],
     from: "foundation",
     to: "tableau",
     meta: {
       toPile: 1
     }
-  };
+  });
 
   const canMakeMove = game.validateMove(move);
 
