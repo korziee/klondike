@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { KlondikeGame, IMove } from "engine/lib/classes/KlondikeGame";
+import { KlondikeGame, Move } from "engine/lib/";
 import { ICardPileCard } from "../components/CardPile";
 import { Card } from "engine/lib/classes/Card";
 import { TSuit } from "engine/lib/types/TSuit";
@@ -107,7 +107,7 @@ export const GameHandler: React.FC = ({ children }) => {
       cards = [selectedCard.card];
     }
 
-    const move: IMove = {
+    const move = new Move({
       from: selectedCard.from,
       to: from,
       cards,
@@ -115,7 +115,7 @@ export const GameHandler: React.FC = ({ children }) => {
         fromPile: selectedCard.fromPile,
         toPile: pile
       }
-    };
+    });
 
     const canMakeMove = game.validateMove(move);
 
@@ -165,7 +165,7 @@ export const GameHandler: React.FC = ({ children }) => {
       cards = [selectedCard.card];
     }
 
-    const move: IMove = {
+    const move = new Move({
       from: selectedCard.from,
       to: from,
       cards,
@@ -173,7 +173,7 @@ export const GameHandler: React.FC = ({ children }) => {
         fromPile: selectedCard.fromPile,
         toPile: fromPile
       }
-    };
+    });
 
     const canMakeMove = game.validateMove(move);
 
