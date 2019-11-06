@@ -59,6 +59,19 @@ export const GameHandler: React.FC = ({ children }) => {
   const [selectedCard, setSelectedCard] = useState<ISelectedCard | null>(null);
   const firstRenderCompleted = useFirstRenderCompleted();
 
+  useEffect(() => {
+    const eventHandler = (event: KeyboardEvent) => {
+      if (event.keyCode !== 27) {
+        return;
+      }
+      setSelectedCard(null);
+    };
+    window.addEventListener("keydown", eventHandler);
+    return () => {
+      window.removeEventListener("keydown", eventHandler);
+    };
+  }, []);
+
   // eslint-disable-next-line
   const [force, setForce] = React.useState<number>(0);
 
