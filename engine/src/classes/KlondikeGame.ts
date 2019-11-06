@@ -5,27 +5,12 @@ import { ISerializedTableau, Tableau } from "./Tableau";
 import { ISerializedWaste, Waste } from "./Waste";
 import { ISerializedStock, Stock } from "./Stock";
 import { TableauPile } from "./TableauPile";
-import { FoundationPile } from "./FoundationPile";
-import * as _ from "lodash";
 import { getSerializedDeck } from "../helpers/getSerializedDeck";
-
-type GameLocation = "tableau" | "foundation" | "waste" | "stock";
-
-// describes moving a card
-export interface IMove {
-  from: GameLocation;
-  // you can never move cards to the stock!
-  to: "tableau" | "foundation" | "waste";
-  cards: Card[];
-  meta?: {
-    // used when moving cards from/to/between the tableua
-    fromPile?: number;
-    toPile?: number;
-  };
-}
+import * as _ from "lodash";
+import { ISerializedMove, Move } from "./Move";
 
 export interface ISerializedKlondikeGame {
-  history: IMove[];
+  history: ISerializedMove[];
   tableau: ISerializedTableau;
   foundation: ISerializedFoundation;
   waste: ISerializedWaste;
@@ -40,17 +25,17 @@ export interface IMoveValidationResult {
 
 export interface IKlondikeGame
   extends ISerializable<KlondikeGame, ISerializedKlondikeGame> {
-  getHistory(): IMove[];
-  getHints(): IMove[] | null;
-  validateMove(move: IMove): IMoveValidationResult;
+  getHistory(): Move[];
+  getHints(): Move[] | null;
+  validateMove(move: Move): IMoveValidationResult;
 
   // returns a boolean denoting whether or not an actual draw was made
   draw(): boolean;
 
-  makeMove(move: IMove): void;
+  makeMove(move: Move): void;
 
   deal(): void;
-  history: IMove[];
+  history: Move[];
   tableau: Tableau;
   foundation: Foundation;
   waste: Waste;
@@ -58,7 +43,7 @@ export interface IKlondikeGame
 }
 
 export class KlondikeGame implements IKlondikeGame {
-  public history: IMove[] = [];
+  public history: Move[] = [];
   public tableau: Tableau;
   public foundation: Foundation;
   public waste: Waste;
@@ -106,7 +91,7 @@ export class KlondikeGame implements IKlondikeGame {
   serialize(): ISerializedKlondikeGame {
     return {
       foundation: this.foundation.serialize(),
-      history: this.history,
+      history: this.history.map(m => m.serialize()),
       stock: this.stock.serialize(),
       tableau: this.tableau.serialize(),
       waste: this.waste.serialize()
@@ -118,6 +103,7 @@ export class KlondikeGame implements IKlondikeGame {
     game.tableau = Tableau.unserialize(serializedGame.tableau);
     game.waste = Waste.unserialize(serializedGame.waste);
     game.stock = Stock.unserialize(serializedGame.stock);
+    game.history = serializedGame.history.map(m => Move.unserialize(m));
     return game;
   }
 
@@ -159,7 +145,7 @@ export class KlondikeGame implements IKlondikeGame {
     this.history = [];
   }
 
-  validateMove(move: IMove): IMoveValidationResult {
+  validateMove(move: Move): IMoveValidationResult {
     const returner = (valid: boolean, invalidMessage?: string) => ({
       valid,
       invalidMessage
@@ -318,7 +304,7 @@ export class KlondikeGame implements IKlondikeGame {
     return returner(true);
   }
 
-  makeMove(move: IMove): void {
+  makeMove(move: Move): void {
     const moveValidation = this.validateMove(move);
     if (!moveValidation.valid) {
       return;
@@ -357,11 +343,11 @@ export class KlondikeGame implements IKlondikeGame {
     throw Error("Unknown move!");
   }
 
-  getHints(): IMove[] | null {
+  getHints(): Move[] | null {
     return null;
   }
 
-  getHistory(): IMove[] {
+  getHistory(): Move[] {
     return this.history;
   }
 }
