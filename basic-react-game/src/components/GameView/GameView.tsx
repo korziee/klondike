@@ -13,12 +13,13 @@ export const GameView: React.FC = () => {
     stock,
     foundation,
     tableau,
-    draw,
-    emptyPileClick
+    emptyPileClick,
+    undo
   } = useContext(GameContext);
 
   return (
     <div>
+      <button onClick={undo}>undo</button>
       <Row style={{ height: "250px" }}>
         <Col span={4} style={{ height: "100%" }}>
           <CardPile

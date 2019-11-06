@@ -17,6 +17,7 @@ export interface IGameContext {
     pile?: number
   ) => void;
   draw: () => void;
+  undo: () => void;
 }
 
 const getDefaultGameContextState = (): IGameContext => ({
@@ -25,7 +26,8 @@ const getDefaultGameContextState = (): IGameContext => ({
   tableau: null!,
   foundation: null!,
   emptyPileClick: () => {},
-  draw: () => {}
+  draw: () => {},
+  undo: () => {}
 });
 
 export const GameContext = React.createContext<IGameContext>(
@@ -261,6 +263,10 @@ export const GameHandler: React.FC = ({ children }) => {
         waste: waste,
         tableau: tableau,
         stock: stock,
+        undo: () => {
+          game.undo();
+          setForce(f => f + 1);
+        },
         draw: () => {
           game.draw();
           setForce(f => f + 1);
