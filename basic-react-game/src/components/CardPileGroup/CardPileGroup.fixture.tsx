@@ -39,12 +39,42 @@ const cards: ICardPileCard[] = [
 export default {
   standard: () => (
     <CardPileGroup>
-      <CardPile cards={cards} fanned fanDirection="down" />
-      <CardPile cards={cards} fanned fanDirection="down" />
-      <CardPile cards={cards} fanned fanDirection="down" />
-      <CardPile cards={cards} fanned fanDirection="down" />
-      <CardPile cards={cards} fanned fanDirection="down" />
-      <CardPile cards={cards} fanned fanDirection="down" />
+      <CardPile
+        onEmptyPileClick={console.log}
+        cards={cards}
+        fanned
+        fanDirection="down"
+      />
+      <CardPile
+        onEmptyPileClick={console.log}
+        cards={cards}
+        fanned
+        fanDirection="down"
+      />
+      <CardPile
+        onEmptyPileClick={console.log}
+        cards={cards}
+        fanned
+        fanDirection="down"
+      />
+      <CardPile
+        onEmptyPileClick={console.log}
+        cards={cards}
+        fanned
+        fanDirection="down"
+      />
+      <CardPile
+        onEmptyPileClick={console.log}
+        cards={cards}
+        fanned
+        fanDirection="down"
+      />
+      <CardPile
+        onEmptyPileClick={console.log}
+        cards={cards}
+        fanned
+        fanDirection="down"
+      />
     </CardPileGroup>
   )
 };

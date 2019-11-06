@@ -12,6 +12,7 @@ export interface ICardPileCard {
 
 export interface ICardPileProps {
   cards: ICardPileCard[];
+  onEmptyPileClick: () => void;
   fanned: boolean;
   /**
    * If fanned is true, a direction must be selected
@@ -27,32 +28,44 @@ export interface ICardPileProps {
 export const CardPile: React.FC<ICardPileProps> = ({
   cards,
   fanned,
+  onEmptyPileClick,
   fanDirection = "down"
 }) => {
   const [ref, { width }] = useDimensions();
 
   return (
-    <div ref={ref} className="card-pile">
-      {cards.map((c, i) => {
-        const style: React.CSSProperties = {};
-        if (fanned) {
-          if (fanDirection === "down") {
-            style.top = i === 0 ? undefined : i * (width / 3);
+    <div ref={ref} className="card-pile" onClick={onEmptyPileClick}>
+      {/* HACK */}
+      <span style={{ position: "absolute" }}>Card Here</span>
+      {width &&
+        cards.map((c, i) => {
+          const style: React.CSSProperties = {};
+          if (fanned) {
+            if (fanDirection === "down") {
+              style.top = i === 0 ? undefined : i * (width / 3);
+            }
+            if (fanDirection === "right") {
+              style.left = i === 0 ? undefined : i * (width / 6.5);
+            }
+            if (fanDirection === "left") {
+              style.right = i === 0 ? 0 : i * (width / 6.5);
+              style.right = style.right - width / 3.2;
+            }
           }
-          if (fanDirection === "right") {
-            style.left = i === 0 ? undefined : i * (width / 6.5);
-          }
-          if (fanDirection === "left") {
-            style.right = i === 0 ? 0 : i * (width / 6.5);
-            style.right = style.right - width / 3.2;
-          }
-        }
-        return (
-          <div className="card" style={style}>
-            <GameCard card={c.card} onClick={c.onClick} selected={c.selected} />
-          </div>
-        );
-      })}
+          return (
+            <div
+              className="card"
+              style={style}
+              key={`${c.card.getRank()}-${c.card.getSuit()}`}
+            >
+              <GameCard
+                card={c.card}
+                onClick={c.onClick}
+                selected={c.selected}
+              />
+            </div>
+          );
+        })}
     </div>
   );
 };

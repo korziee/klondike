@@ -1,5 +1,15 @@
 Cards sourced from https://www.me.uk/cards/
 
+## TODOS
+
+- There is a lot of height:100% happening. First fix would be the styling implementation of CardPile, it uses absolute positioning and ignores the size of the container that it's in. It should realistically set a 'max-height' and then based off of this, work out the ratio's to follow to fan the cards down.
+- Either remove the use of antd grids, and replace with flex for the whole thing, or convert CardPile to use antd grid.
+- add animation signalling a finished game
+- remove "draw" button
+- add "reset button"
+- add "undo button"
+- add "double click - magic move" support
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts

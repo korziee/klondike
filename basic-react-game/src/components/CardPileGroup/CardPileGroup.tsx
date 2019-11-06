@@ -6,7 +6,7 @@ import "./CardPileGroup.css";
  */
 export const CardPileGroup: React.FC = ({ children }) => {
   return (
-    <div className="card-pile-group">
+    <div className="card-pile-group" style={{ height: "100%" }}>
       {React.Children.map(children, component => {
         return component;
       })}
