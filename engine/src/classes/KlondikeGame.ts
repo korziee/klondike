@@ -91,6 +91,12 @@ export class KlondikeGame implements IKlondikeGame {
       return false;
     }
 
+    // add this into the history so that user's can undo this
+    this.history.push({
+      move: null,
+      state: this.serialize()
+    });
+
     // stock is empty, we need to transfer all of the cards from the waste into the stock
     if (this.stock.getCards().length === 0) {
       const cardsInWaste = this.waste.getCards();
