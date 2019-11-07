@@ -10,6 +10,8 @@ Cards sourced from https://www.me.uk/cards/
 - add "undo button"
 - add "double click - magic move" support
 
+One way to fix the positioning issues is to to work out what the LARGEST size of a card can be (using a centred layout to limit the page width), and then applying a percentage based width/height to the cards based on the screen size, and then also scale the height for the top row to be similar to the a size a scaled card PLUS a gap
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
