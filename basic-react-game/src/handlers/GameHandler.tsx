@@ -4,6 +4,7 @@ import { ICardPileCard } from "../components/CardPile";
 import { Card } from "engine/lib/classes/Card";
 import { TSuit } from "engine/lib/types/TSuit";
 import { useKeyPress } from "../hooks/useKeyPress";
+import * as _ from "lodash";
 
 // TODO - this card has not had any refactoring, just code thrown at it
 // alot of the move logic needs to be generecised and the methods and cards should be memoized as to not cause unnesccesary re-renders
@@ -81,6 +82,9 @@ export const GameHandler: React.FC = ({ children }) => {
   ) => {
     if (from === "stock") {
       game.draw();
+      setSelectedCard(null);
+      setSelectedCard(null);
+      setSelectedCard(null);
       setForce(f => f + 1);
       return;
     }
@@ -149,6 +153,7 @@ export const GameHandler: React.FC = ({ children }) => {
       setSelectedCard({ card, from, fromPile });
       return;
     }
+
     // user is trying to make a move, we need to build out the move object, validate, make move and then force re-render
     // if they are trying to move from the tableau, we need to get a list of all the cards that exist below the selected card
 
@@ -173,6 +178,20 @@ export const GameHandler: React.FC = ({ children }) => {
       cards = cardsToMove;
     } else {
       cards = [selectedCard.card];
+    }
+
+    // now that we have done the accumulating of the tableau cards, lets see if it's a "magic add"
+    if (_.isEqual(selectedCard.card, card)) {
+      // selecting the same card, likely a "magic move attempt"
+      const canMove = game.canMoveCardsAnywhere(cards);
+      if (!canMove.valid) {
+        console.log(canMove);
+        return;
+      }
+      game.moveCardsAnywhere(cards);
+      setSelectedCard(null);
+      setForce(f => f + 1);
+      return;
     }
 
     const move = new Move({
@@ -203,6 +222,8 @@ export const GameHandler: React.FC = ({ children }) => {
         card,
         onClick: () => {
           game.draw();
+          setSelectedCard(null);
+          setSelectedCard(null);
           setForce(f => f + 1);
         },
         selected: false
@@ -273,10 +294,12 @@ export const GameHandler: React.FC = ({ children }) => {
         stock: stock,
         undo: () => {
           game.undo();
+          setSelectedCard(null);
           setForce(f => f + 1);
         },
         draw: () => {
           game.draw();
+          setSelectedCard(null);
           setForce(f => f + 1);
         }
       }}

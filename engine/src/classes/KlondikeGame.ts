@@ -28,6 +28,16 @@ export interface IMoveValidationResult {
   invalidMessage?: string;
 }
 
+export interface ICanMoveCardAnywhereResult extends IMoveValidationResult {
+  to?: "tableau" | "foundation";
+  toPile?: number;
+}
+
+export interface IFindCardResult {
+  location: "stock" | "waste" | "tableau" | "foundation";
+  locationPile?: number;
+}
+
 export interface IKlondikeGame
   extends ISerializable<KlondikeGame, ISerializedKlondikeGame> {
   getHistory(): IHistory[];
@@ -44,6 +54,10 @@ export interface IKlondikeGame
 
   deal(): void;
 
+  canMoveCardsAnywhere(cards: Card[]): ICanMoveCardAnywhereResult;
+
+  moveCardsAnywhere(cards: Card[]): ICanMoveCardAnywhereResult;
+
   history: IHistory[];
   tableau: Tableau;
   foundation: Foundation;
@@ -57,6 +71,124 @@ export class KlondikeGame implements IKlondikeGame {
   public foundation: Foundation;
   public waste: Waste;
   public stock: Stock;
+
+  private findCardInGame(card: Card): IFindCardResult {
+    const isInStock = this.stock
+      .getCards()
+      .find(c => _.isEqual(c.serialize(), card.serialize()));
+    if (isInStock) {
+      return {
+        location: "stock"
+      };
+    }
+    const isInWaste = this.waste
+      .getCards()
+      .find(c => _.isEqual(c.serialize(), card.serialize()));
+    if (isInWaste) {
+      return {
+        location: "waste"
+      };
+    }
+    const isInFoundation = this.foundation
+      .getPileForSuit(card.getSuit())
+      .getCards()
+      .find(c => _.isEqual(c.serialize(), card.serialize()));
+    if (isInFoundation) {
+      return {
+        location: "foundation"
+      };
+    }
+    for (let i = 1; i <= 7; i += 1) {
+      const isInTableau = this.tableau
+        .getTableauPile(i)
+        .getCards()
+        .find(c => _.isEqual(c.serialize(), card.serialize()));
+
+      if (isInTableau) {
+        return {
+          location: "tableau",
+          locationPile: i
+        };
+      }
+    }
+
+    throw new Error("cannot find card in game!");
+  }
+
+  canMoveCardsAnywhere(cards: Card[]): ICanMoveCardAnywhereResult {
+    if (typeof cards === "undefined" || cards.length < 1) {
+      return {
+        invalidMessage: "Cannot move cards if no cards are passed",
+        valid: false
+      };
+    }
+
+    // can only add one card to foundation at a time
+    if (cards.length === 1) {
+      const canAddToFoundation = this.foundation
+        .getPileForSuit(cards[0].getSuit())
+        .canAddCards(cards);
+      if (canAddToFoundation) {
+        return {
+          to: "foundation",
+          valid: true
+        };
+      }
+    }
+
+    for (let i = 1; i <= 7; i += 1) {
+      const canAdd = this.tableau.getTableauPile(i).canAddCards(cards);
+      // will return true on the first pile
+      if (canAdd) {
+        return {
+          to: "tableau",
+          toPile: i,
+          valid: true
+        };
+      }
+    }
+
+    return {
+      invalidMessage: "cannot add to either the tableau or foundation",
+      valid: false
+    };
+  }
+
+  moveCardsAnywhere(cards: Card[]): ICanMoveCardAnywhereResult {
+    const canMove = this.canMoveCardsAnywhere(cards);
+
+    if (!canMove.valid) {
+      return canMove;
+    }
+
+    const cardsToRemove = cards.map(c => this.findCardInGame(c));
+
+    cardsToRemove.forEach(c => {
+      switch (c.location) {
+        case "stock":
+          this.stock.removeCards(cards);
+          break;
+        case "waste":
+          this.waste.removeCards(cards);
+          break;
+        case "foundation":
+          this.foundation.getPileForSuit(cards[0].getSuit()).removeCards(cards);
+          break;
+        case "tableau":
+          this.tableau.getTableauPile(c.locationPile).removeCards(cards);
+          break;
+        default:
+          break;
+      }
+    });
+
+    if (canMove.to === "tableau") {
+      this.tableau.getTableauPile(canMove.toPile).addCards(cards);
+    }
+    if (canMove.to === "foundation") {
+      this.foundation.getPileForSuit(cards[0].getSuit()).addCards(cards);
+    }
+  }
 
   undo(): void {
     // using history, we need to look at the last move, and set the state back using the ovveride `set` methods
@@ -80,6 +212,8 @@ export class KlondikeGame implements IKlondikeGame {
     this.history = history;
     this.tableau = tableau;
     this.waste = waste;
+
+    this.history.pop();
   }
 
   draw(): boolean {
@@ -380,7 +514,6 @@ export class KlondikeGame implements IKlondikeGame {
       return;
     }
 
-    this.history.pop();
     throw Error("Unknown move!");
   }
 

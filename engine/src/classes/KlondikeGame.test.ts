@@ -47,6 +47,179 @@ const getEmptySerializedGame = (): ISerializedKlondikeGame => ({
   }
 });
 
+test("canMoveCardsAnywhere() returns true if atleast one move can be made", t => {
+  const serializedGame = getEmptySerializedGame();
+  serializedGame.tableau.piles[0].cards.push(
+    {
+      suit: "Clubs",
+      rank: "10",
+      upturned: true
+    },
+    {
+      suit: "Diamonds",
+      rank: "9",
+      upturned: true
+    }
+  );
+
+  serializedGame.tableau.piles[1].cards.push({
+    suit: "Diamonds",
+    rank: "Jack",
+    upturned: true
+  });
+  serializedGame.tableau.piles[2].cards.push({
+    suit: "Spades",
+    rank: "10",
+    upturned: true
+  });
+  const game = KlondikeGame.unserialize(serializedGame);
+
+  const canMove = game.canMoveCardsAnywhere([
+    new Card("Clubs", "10", true),
+    new Card("Diamonds", "9", true)
+  ]);
+  t.true(canMove.valid);
+});
+
+test("moveCardsAnywhere() moves the cards if atleast one move can be made", t => {
+  const serializedGame = getEmptySerializedGame();
+  serializedGame.tableau.piles[0].cards.push(
+    {
+      suit: "Clubs",
+      rank: "10",
+      upturned: true
+    },
+    {
+      suit: "Diamonds",
+      rank: "9",
+      upturned: true
+    }
+  );
+
+  serializedGame.tableau.piles[1].cards.push({
+    suit: "Diamonds",
+    rank: "Jack",
+    upturned: true
+  });
+  serializedGame.tableau.piles[2].cards.push({
+    suit: "Spades",
+    rank: "10",
+    upturned: true
+  });
+  const game = KlondikeGame.unserialize(serializedGame);
+
+  game.moveCardsAnywhere([
+    new Card("Clubs", "10", true),
+    new Card("Diamonds", "9", true)
+  ]);
+
+  t.deepEqual(
+    game.tableau
+      .getTableauPile(2)
+      .getCards()
+      .map(c => c.serialize()),
+    [
+      {
+        suit: "Diamonds",
+        rank: "Jack",
+        upturned: true
+      },
+      {
+        suit: "Clubs",
+        rank: "10",
+        upturned: true
+      },
+      {
+        suit: "Diamonds",
+        rank: "9",
+        upturned: true
+      }
+    ]
+  );
+});
+
+test("moveCardsAnywhere() does not move any cards if no moves can be made", t => {
+  const serializedGame = getEmptySerializedGame();
+  serializedGame.tableau.piles[0].cards.push(
+    {
+      suit: "Clubs",
+      rank: "10",
+      upturned: true
+    },
+    {
+      suit: "Diamonds",
+      rank: "9",
+      upturned: true
+    }
+  );
+
+  serializedGame.tableau.piles[1].cards.push({
+    suit: "Clubs",
+    rank: "Jack",
+    upturned: true
+  });
+  serializedGame.tableau.piles[2].cards.push({
+    suit: "Spades",
+    rank: "10",
+    upturned: true
+  });
+  const game = KlondikeGame.unserialize(serializedGame);
+
+  game.moveCardsAnywhere([
+    new Card("Clubs", "10", true),
+    new Card("Diamonds", "9", true)
+  ]);
+
+  t.deepEqual(
+    game.tableau
+      .getTableauPile(2)
+      .getCards()
+      .map(c => c.serialize()),
+    [
+      {
+        suit: "Clubs",
+        rank: "Jack",
+        upturned: true
+      }
+    ]
+  );
+});
+
+test("canMoveCardsAnywhere() returns false if no moves can be made", t => {
+  const serializedGame = getEmptySerializedGame();
+  serializedGame.tableau.piles[0].cards.push(
+    {
+      suit: "Clubs",
+      rank: "10",
+      upturned: true
+    },
+    {
+      suit: "Diamonds",
+      rank: "9",
+      upturned: true
+    }
+  );
+
+  serializedGame.tableau.piles[1].cards.push({
+    suit: "Clubs",
+    rank: "Jack",
+    upturned: true
+  });
+  serializedGame.tableau.piles[2].cards.push({
+    suit: "Spades",
+    rank: "10",
+    upturned: true
+  });
+  const game = KlondikeGame.unserialize(serializedGame);
+
+  const canMove = game.canMoveCardsAnywhere([
+    new Card("Clubs", "10", true),
+    new Card("Diamonds", "9", true)
+  ]);
+
+  t.false(canMove.valid);
+});
+
 test("getHistory() returns the correct history", t => {
   const serializedGame = getEmptySerializedGame();
   serializedGame.tableau.piles[0].cards.push(
@@ -83,7 +256,7 @@ test("getHistory() returns the correct history", t => {
   t.deepEqual(game.getHistory()[0].move, move.serialize());
 });
 
-test.only("undo() moves the game state back one move", t => {
+test("undo() moves the game state back one move", t => {
   const serializedGame = getEmptySerializedGame();
   serializedGame.tableau.piles[0].cards.push(
     {
