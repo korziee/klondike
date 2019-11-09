@@ -76,7 +76,7 @@ export const GameCard: React.FC<IGameCardProps> = ({
   onClick,
   selected
 }) => {
-  const getCard = () => {
+  const getCard = useCallback(() => {
     if (card.getUpturned() === false) {
       return <BlackBlank />;
     }
@@ -206,7 +206,7 @@ export const GameCard: React.FC<IGameCardProps> = ({
         break;
       }
     }
-  };
+  }, [card]);
 
   const onClickNoProgation = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
