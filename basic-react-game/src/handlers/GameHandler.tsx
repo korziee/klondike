@@ -1,48 +1,20 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback
+} from "react";
 import { KlondikeGame, Move } from "engine/lib/";
 import { ICardPileCard } from "../components/CardPile";
 import { Card } from "engine/lib/classes/Card";
 import { TSuit } from "engine/lib/types/TSuit";
 import { useKeyPress } from "../hooks/useKeyPress";
 import * as _ from "lodash";
+import { GameContext, IGameContext } from "../contexts/GameContext";
 
 // TODO - this card has not had any refactoring, just code thrown at it
 // alot of the move logic needs to be generecised and the methods and cards should be memoized as to not cause unnesccesary re-renders
-
-export interface IGameContext {
-  waste: ICardPileCard[];
-  stock: ICardPileCard[];
-  tableau: ICardPileCard[][];
-  foundation: ICardPileCard[][];
-  emptyPileClick: (
-    from: "tableau" | "foundation" | "waste" | "stock",
-    pile?: number
-  ) => void;
-  draw: () => void;
-  undo: () => void;
-}
-
-const getDefaultGameContextState = (): IGameContext => ({
-  waste: null!,
-  stock: null!,
-  tableau: null!,
-  foundation: null!,
-  emptyPileClick: () => {},
-  draw: () => {},
-  undo: () => {}
-});
-
-export const GameContext = React.createContext<IGameContext>(
-  getDefaultGameContextState()
-);
-
-const useFirstRenderCompleted = () => {
-  const [completed, setCompleted] = useState(false);
-  useEffect(() => {
-    setCompleted(true);
-  }, []);
-  return completed;
-};
 
 interface ISelectedCard {
   card: Card;
@@ -59,33 +31,48 @@ interface ISelectedCard {
 export const GameHandler: React.FC = ({ children }) => {
   // suit, rank
   const [selectedCard, setSelectedCard] = useState<ISelectedCard | null>(null);
-  const firstRenderCompleted = useFirstRenderCompleted();
-
+  const [gameStarted, setGameStarted] = useState(false);
+  const gameRef = useRef(new KlondikeGame());
   const escapePressed = useKeyPress("Escape");
 
-  if (escapePressed && selectedCard !== null) {
+  const clearSelectedCard = () => {
     setSelectedCard(null);
+  };
+
+  if (escapePressed && selectedCard !== null) {
+    clearSelectedCard();
   }
 
   // eslint-disable-next-line
   const [force, setForce] = React.useState<number>(0);
 
-  const { current: game } = useRef(new KlondikeGame());
+  const forceRender = () => setForce(f => f + 1);
 
-  if (!firstRenderCompleted) {
-    game.deal();
-  }
+  const start = useCallback(() => {
+    gameRef.current.deal();
+    // start the game
+    setGameStarted(true);
+    forceRender();
+  }, []);
+
+  const undo = useCallback(() => {
+    gameRef.current.undo();
+    clearSelectedCard();
+  }, []);
+
+  const draw = useCallback(() => {
+    gameRef.current.draw();
+    forceRender();
+    clearSelectedCard();
+  }, []);
 
   const onEmptyPileClicked = (
     from: "tableau" | "foundation" | "waste" | "stock",
     pile?: number
   ) => {
     if (from === "stock") {
-      game.draw();
-      setSelectedCard(null);
-      setSelectedCard(null);
-      setSelectedCard(null);
-      setForce(f => f + 1);
+      gameRef.current.draw();
+      clearSelectedCard();
       return;
     }
     if (from === "waste") {
@@ -101,7 +88,7 @@ export const GameHandler: React.FC = ({ children }) => {
     let cards;
 
     if (selectedCard.from === "tableau") {
-      const cardsInTableau = game.tableau
+      const cardsInTableau = gameRef.current.tableau
         .getTableauPile(selectedCard.fromPile!)
         .getCards();
 
@@ -131,16 +118,15 @@ export const GameHandler: React.FC = ({ children }) => {
       }
     });
 
-    const canMakeMove = game.validateMove(move);
+    const canMakeMove = gameRef.current.validateMove(move);
 
     if (!canMakeMove.valid) {
-      setSelectedCard(null);
+      clearSelectedCard();
       return;
     }
 
-    game.makeMove(move);
-    setSelectedCard(null);
-    setForce(f => f + 1);
+    gameRef.current.makeMove(move);
+    clearSelectedCard();
   };
 
   const onCardSelected = (
@@ -160,7 +146,7 @@ export const GameHandler: React.FC = ({ children }) => {
     let cards;
 
     if (selectedCard.from === "tableau") {
-      const cardsInTableau = game.tableau
+      const cardsInTableau = gameRef.current.tableau
         .getTableauPile(selectedCard.fromPile!)
         .getCards();
 
@@ -183,14 +169,13 @@ export const GameHandler: React.FC = ({ children }) => {
     // now that we have done the accumulating of the tableau cards, lets see if it's a "magic add"
     if (_.isEqual(selectedCard.card, card)) {
       // selecting the same card, likely a "magic move attempt"
-      const canMove = game.canMoveCardsAnywhere(cards);
+      const canMove = gameRef.current.canMoveCardsAnywhere(cards);
       if (!canMove.valid) {
-        console.log(canMove);
+        // console.log(canMove);
         return;
       }
-      game.moveCardsAnywhere(cards);
-      setSelectedCard(null);
-      setForce(f => f + 1);
+      gameRef.current.moveCardsAnywhere(cards);
+      clearSelectedCard();
       return;
     }
 
@@ -204,106 +189,123 @@ export const GameHandler: React.FC = ({ children }) => {
       }
     });
 
-    const canMakeMove = game.validateMove(move);
+    const canMakeMove = gameRef.current.validateMove(move);
 
     if (!canMakeMove.valid) {
-      setSelectedCard(null);
+      clearSelectedCard();
       return;
     }
 
-    game.makeMove(move);
-    setSelectedCard(null);
-    setForce(f => f + 1);
+    gameRef.current.makeMove(move);
+    clearSelectedCard();
   };
 
-  const stock = game.stock.getCards().map(
-    (card): ICardPileCard => {
-      return {
-        card,
-        onClick: () => {
-          game.draw();
-          setSelectedCard(null);
-          setSelectedCard(null);
-          setForce(f => f + 1);
-        },
-        selected: false
-      };
+  const getStockPileCards = (): ICardPileCard[] => {
+    if (!gameStarted) {
+      return [];
     }
-  );
 
-  const waste = game.waste.getCards().map(
-    (card): ICardPileCard => {
-      return {
-        card,
-        onClick: () => onCardSelected(card, "waste"),
-        selected:
-          selectedCard !== null &&
-          selectedCard.card.getSuit() === card.getSuit() &&
-          selectedCard.card.getRank() === card.getRank()
-      };
+    return gameRef.current.stock.getCards().map(
+      (card): ICardPileCard => {
+        return {
+          card,
+          onClick: () => {
+            gameRef.current.draw();
+            clearSelectedCard();
+          },
+          selected: false
+        };
+      }
+    );
+  };
+
+  const getWastePileCards = (): ICardPileCard[] => {
+    if (!gameStarted) {
+      return [];
     }
-  );
 
-  const tableau: ICardPileCard[][] = [];
+    return gameRef.current.waste.getCards().map(
+      (card): ICardPileCard => {
+        return {
+          card,
+          onClick: () => onCardSelected(card, "waste"),
+          selected:
+            selectedCard !== null &&
+            selectedCard.card.getSuit() === card.getSuit() &&
+            selectedCard.card.getRank() === card.getRank()
+        };
+      }
+    );
+  };
 
-  for (let i = 1; i <= 7; i += 1) {
-    tableau[i - 1] = game.tableau
-      .getTableauPile(i)
-      .getCards()
-      .map(
-        (card): ICardPileCard => {
-          return {
-            card,
-            onClick: () => onCardSelected(card, "tableau", i),
-            selected:
-              selectedCard !== null &&
-              selectedCard.card.getSuit() === card.getSuit() &&
-              selectedCard.card.getRank() === card.getRank()
-          };
-        }
-      );
-  }
+  const getTableauPiles = (): ICardPileCard[][] => {
+    if (!gameStarted) {
+      return Array(7).fill([]);
+    }
+    const tableau: ICardPileCard[][] = [];
 
-  const foundation: ICardPileCard[][] = [];
+    for (let i = 1; i <= 7; i += 1) {
+      tableau[i - 1] = gameRef.current.tableau
+        .getTableauPile(i)
+        .getCards()
+        .map(
+          (card): ICardPileCard => {
+            return {
+              card,
+              onClick: () => onCardSelected(card, "tableau", i),
+              selected:
+                selectedCard !== null &&
+                selectedCard.card.getSuit() === card.getSuit() &&
+                selectedCard.card.getRank() === card.getRank()
+            };
+          }
+        );
+    }
+    return tableau;
+  };
 
-  (["Clubs", "Spades", "Diamonds", "Hearts"] as TSuit[]).forEach((suit, i) => {
-    foundation[i] = game.foundation
-      .getPileForSuit(suit)
-      .getCards()
-      .map(
-        (card): ICardPileCard => {
-          return {
-            card,
-            onClick: () => onCardSelected(card, "foundation", i + 1),
-            selected:
-              selectedCard !== null &&
-              selectedCard.card.getSuit() === card.getSuit() &&
-              selectedCard.card.getRank() === card.getRank()
-          };
-        }
-      );
-  });
+  const getFoundationPiles = (): ICardPileCard[][] => {
+    if (!gameStarted) {
+      return Array(4).fill([]);
+    }
+    const foundation: ICardPileCard[][] = [];
+
+    (["Clubs", "Spades", "Diamonds", "Hearts"] as TSuit[]).forEach(
+      (suit, i) => {
+        foundation[i] = gameRef.current.foundation
+          .getPileForSuit(suit)
+          .getCards()
+          .map(
+            (card): ICardPileCard => {
+              return {
+                card,
+                onClick: () => onCardSelected(card, "foundation", i + 1),
+                selected:
+                  selectedCard !== null &&
+                  selectedCard.card.getSuit() === card.getSuit() &&
+                  selectedCard.card.getRank() === card.getRank()
+              };
+            }
+          );
+      }
+    );
+    return foundation;
+  };
+
+  // TODO - memoize
+  const providerValue: IGameContext = {
+    emptyPileClick: onEmptyPileClicked,
+    foundation: getFoundationPiles(),
+    waste: getWastePileCards(),
+    tableau: getTableauPiles(),
+    stock: getStockPileCards(),
+    undo: undo,
+    draw: draw,
+    start: start
+  };
 
   return (
-    <GameContext.Provider
-      value={{
-        emptyPileClick: onEmptyPileClicked,
-        foundation: foundation,
-        waste: waste,
-        tableau: tableau,
-        stock: stock,
-        undo: () => {
-          game.undo();
-          setSelectedCard(null);
-          setForce(f => f + 1);
-        },
-        draw: () => {
-          game.draw();
-          setSelectedCard(null);
-          setForce(f => f + 1);
-        }
-      }}
-    >
+    <GameContext.Provider value={providerValue}>
       {children}
     </GameContext.Provider>
   );

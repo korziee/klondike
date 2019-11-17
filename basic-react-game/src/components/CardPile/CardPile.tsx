@@ -1,5 +1,5 @@
 import { Card } from "engine/lib/classes/Card";
-import React from "react";
+import React, { useMemo } from "react";
 import useDimensions from "react-use-dimensions";
 import { GameCard } from "../GameCard";
 import "./CardPile.css";
@@ -20,44 +20,50 @@ export interface ICardPileProps {
    * @default "down"
    */
   fanDirection?: "down" | "right" | "left";
+  pileWidth: number;
+  pileXPosition: number;
 }
 
-/**
- * Left fan looks strange
- */
 export const CardPile: React.FC<ICardPileProps> = ({
   cards,
   fanned,
   onEmptyPileClick,
-  fanDirection = "down"
+  fanDirection = "down",
+  pileWidth,
+  pileXPosition
 }) => {
   const [ref, { width }] = useDimensions();
 
+  const shouldShowBorder = !cards || !(cards && cards.length > 0);
+
+  const cardPileStyles = useMemo(
+    (): React.CSSProperties => ({
+      position: "absolute",
+      width: pileWidth,
+      left: pileXPosition,
+      border: shouldShowBorder ? "1px solid red" : ""
+    }),
+    [shouldShowBorder]
+  );
+
   return (
-    <div ref={ref} className="card-pile" onClick={onEmptyPileClick}>
-      {/* HACK */}
-      <span style={{ position: "absolute" }}>Card Here</span>
+    <div ref={ref} style={cardPileStyles} onClick={onEmptyPileClick}>
       {width &&
         cards.map((c, i) => {
-          const style: React.CSSProperties = {};
+          // cannot memoize this
+          const style: React.CSSProperties = {
+            position: "absolute"
+          };
+
           if (fanned) {
             if (fanDirection === "down") {
               style.top = i === 0 ? undefined : i * (width / 3);
-            }
-            if (fanDirection === "right") {
-              style.left = i === 0 ? undefined : i * (width / 6.5);
-            }
-            if (fanDirection === "left") {
-              style.right = i === 0 ? 0 : i * (width / 6.5);
-              style.right = style.right - width / 3.2;
+            } else {
+              console.warn("only down fan is implemented");
             }
           }
           return (
-            <div
-              className="card"
-              style={style}
-              key={`${c.card.getRank()}-${c.card.getSuit()}`}
-            >
+            <div style={style} key={`${c.card.getRank()}-${c.card.getSuit()}`}>
               <GameCard
                 card={c.card}
                 onClick={c.onClick}

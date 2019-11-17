@@ -1,0 +1,5 @@
+.GameView {
+  /* TODO: change this based on window width */
+  margin: 10px;
+  position: relative;
+}

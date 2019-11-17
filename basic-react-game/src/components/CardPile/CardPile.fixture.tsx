@@ -38,12 +38,20 @@ const cards: ICardPileCard[] = [
 export default {
   unfanned: () => (
     <div style={{ maxWidth: "200px" }}>
-      <CardPile cards={cards} fanned={false} onEmptyPileClick={console.log} />
+      <CardPile
+        pileWidth={100}
+        pileXPosition={10}
+        cards={cards}
+        fanned={false}
+        onEmptyPileClick={console.log}
+      />
     </div>
   ),
   FannedRight: () => (
     <div style={{ maxWidth: "200px" }}>
       <CardPile
+        pileWidth={100}
+        pileXPosition={10}
         cards={cards.slice(3, 6)}
         onEmptyPileClick={console.log}
         fanned
@@ -52,8 +60,10 @@ export default {
     </div>
   ),
   FannedLeft: () => (
-    <div style={{ maxWidth: "200px" }}>
+    <div>
       <CardPile
+        pileWidth={100}
+        pileXPosition={10}
         cards={cards.slice(3, 6)}
         onEmptyPileClick={console.log}
         fanned
@@ -64,6 +74,8 @@ export default {
   FannedDown: () => (
     <div style={{ maxWidth: "200px" }}>
       <CardPile
+        pileWidth={100}
+        pileXPosition={10}
         cards={cards}
         fanned
         onEmptyPileClick={console.log}

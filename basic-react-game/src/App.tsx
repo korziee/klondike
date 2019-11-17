@@ -1,7 +1,7 @@
 import React from "react";
 import "./App.css";
-import { GameView } from "./components/GameView";
 import { GameHandler } from "./handlers/GameHandler";
+import { GameView } from "./components/GameView/GameView";
 
 export const App: React.FC = () => {
   return (

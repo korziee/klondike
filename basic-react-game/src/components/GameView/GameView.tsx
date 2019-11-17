@@ -1,111 +1,113 @@
-import React, { useContext } from "react";
-import { Row, Col } from "antd";
-import "antd/es/grid/style/css"; // for css
+import React, { useContext, useMemo } from "react";
+import useDimensions from "react-use-dimensions";
+import { GameContext } from "../../contexts/GameContext";
+import { getCardPilePosition } from "../../helpers/getCardPilePosition";
+import { getCardPileWidth } from "../../helpers/getCardPileWidth";
 import { CardPile } from "../CardPile";
-import { CardPileGroup } from "../CardPileGroup";
-import { GameContext } from "../../handlers/GameHandler";
+import "./GameView.css";
 
-// TODO - remove hard coded heights
+export interface IGameViewInnerProps {
+  containerWidth: number;
+}
 
-export const GameView: React.FC = () => {
+const GameViewInner: React.FC<IGameViewInnerProps> = ({ containerWidth }) => {
   const {
     waste,
     stock,
     foundation,
     tableau,
     emptyPileClick,
-    undo
+    undo,
+    start
   } = useContext(GameContext);
 
+  const cardWidth = getCardPileWidth(containerWidth);
+  const approxCardHeight = cardWidth / 0.673;
+
+  const stockPile = (
+    <CardPile
+      pileWidth={cardWidth}
+      pileXPosition={0}
+      cards={stock}
+      fanned={false}
+      onEmptyPileClick={() => emptyPileClick("stock")}
+    />
+  );
+
+  const wastePile = (
+    <CardPile
+      pileWidth={cardWidth}
+      pileXPosition={getCardPilePosition(1, containerWidth)}
+      cards={waste}
+      fanned={false}
+      onEmptyPileClick={() => emptyPileClick("waste")}
+    />
+  );
+
+  const foundationPile = foundation.map((f, i) => (
+    <CardPile
+      key={`foundation-${i}`}
+      pileWidth={cardWidth}
+      pileXPosition={getCardPilePosition(i + 3, containerWidth)}
+      cards={f}
+      fanned={false}
+      onEmptyPileClick={() => emptyPileClick("foundation", i)}
+    />
+  ));
+
+  const tableauPiles = tableau.map((t, i) => (
+    <CardPile
+      key={`tableau-${i}`}
+      pileWidth={cardWidth}
+      pileXPosition={getCardPilePosition(i, containerWidth)}
+      cards={t}
+      fanned
+      fanDirection="down"
+      onEmptyPileClick={() => emptyPileClick("tableau", i)}
+    />
+  ));
+
+  const topRowStyles = useMemo(
+    (): React.CSSProperties => ({ position: "relative" }),
+    []
+  );
+
+  const bottomRowStyles = useMemo(
+    (): React.CSSProperties => ({
+      position: "absolute",
+      top: approxCardHeight
+    }),
+    [approxCardHeight]
+  );
+
   return (
-    <div>
-      <button onClick={undo}>undo</button>
-      <Row style={{ height: "250px" }}>
-        <Col span={4} style={{ height: "100%" }}>
-          <CardPile
-            onEmptyPileClick={() => emptyPileClick("stock")}
-            cards={stock}
-            fanned={false}
-          />
-        </Col>
-        <Col span={4} offset={1} style={{ height: "100%" }}>
-          <CardPile
-            onEmptyPileClick={() => emptyPileClick("waste")}
-            cards={waste}
-            fanned={false}
-          />
-        </Col>
-        <Col span={12} offset={3} style={{ height: "100%" }}>
-          <CardPileGroup>
-            <CardPile
-              onEmptyPileClick={() => emptyPileClick("foundation", 1)}
-              cards={foundation[0]}
-              fanned={false}
-            />
-            <CardPile
-              onEmptyPileClick={() => emptyPileClick("foundation", 2)}
-              cards={foundation[1]}
-              fanned={false}
-            />
-            <CardPile
-              onEmptyPileClick={() => emptyPileClick("foundation", 3)}
-              cards={foundation[2]}
-              fanned={false}
-            />
-            <CardPile
-              onEmptyPileClick={() => emptyPileClick("foundation", 4)}
-              cards={foundation[3]}
-              fanned={false}
-            />
-          </CardPileGroup>
-        </Col>
-      </Row>
-      <div style={{ height: "250px" }}>
-        <CardPileGroup>
-          <CardPile
-            onEmptyPileClick={() => emptyPileClick("tableau", 1)}
-            cards={tableau[0]}
-            fanned
-            fanDirection="down"
-          />
-          <CardPile
-            onEmptyPileClick={() => emptyPileClick("tableau", 2)}
-            cards={tableau[1]}
-            fanned
-            fanDirection="down"
-          />
-          <CardPile
-            onEmptyPileClick={() => emptyPileClick("tableau", 3)}
-            cards={tableau[2]}
-            fanned
-            fanDirection="down"
-          />
-          <CardPile
-            onEmptyPileClick={() => emptyPileClick("tableau", 4)}
-            cards={tableau[3]}
-            fanned
-            fanDirection="down"
-          />
-          <CardPile
-            onEmptyPileClick={() => emptyPileClick("tableau", 5)}
-            cards={tableau[4]}
-            fanned
-            fanDirection="down"
-          />
-          <CardPile
-            onEmptyPileClick={() => emptyPileClick("tableau", 6)}
-            cards={tableau[5]}
-            fanned
-            fanDirection="down"
-          />
-          <CardPile
-            onEmptyPileClick={() => emptyPileClick("tableau", 7)}
-            cards={tableau[6]}
-            fanned
-            fanDirection="down"
-          />
-        </CardPileGroup>
+    <>
+      {/* TODO: remove when the menu bar exists */}
+      <button onClick={start}>Start</button>
+      <button onClick={undo}>Undo</button>
+      <div style={topRowStyles}>
+        <div>
+          {stockPile}
+          {wastePile}
+          {foundationPile}
+        </div>
+        <div style={bottomRowStyles}>{tableauPiles}</div>
       </div>
+    </>
+  );
+};
+
+export const GameView: React.FC = () => {
+  // width is the available width for this view!
+  // we should use this to calculate the sizes of all the cards on the screen
+  // we want EVERY card to be the same size, so we need to base this off of the fact that there are going to be max 7 tableau cards on the horizonatal plane at any given time
+  // Assume that this view is 100%, we should only provide bare margins
+  const [ref, { width }] = useDimensions();
+
+  return (
+    <div className="GameView">
+      {/* GameViewInner does calculation based on the width, so we don't want to return */}
+      <div ref={ref}>{width && <GameViewInner containerWidth={width} />}</div>
     </div>
   );
 };
