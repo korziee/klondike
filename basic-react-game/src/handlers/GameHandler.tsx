@@ -7,9 +7,6 @@ import { useKeyPress } from "../hooks/useKeyPress";
 import * as _ from "lodash";
 import { GameContext, IGameContext } from "../contexts/GameContext";
 
-// TODO - this card has not had any refactoring, just code thrown at it
-// alot of the move logic needs to be generecised and the methods and cards should be memoized as to not cause unnesccesary re-renders
-
 interface ISelectedCard {
   card: Card;
   from: "tableau" | "foundation" | "waste";
@@ -40,7 +37,9 @@ export const GameHandler: React.FC = ({ children }) => {
   // eslint-disable-next-line
   const [force, setForce] = React.useState<number>(0);
 
-  const forceRender = () => setForce(f => f + 1);
+  const forceRender = () => {
+    setForce(f => f + 1);
+  };
 
   const start = useCallback(() => {
     gameRef.current.deal();
@@ -52,12 +51,13 @@ export const GameHandler: React.FC = ({ children }) => {
   const undo = useCallback(() => {
     gameRef.current.undo();
     clearSelectedCard();
+    forceRender();
   }, []);
 
   const draw = useCallback(() => {
     gameRef.current.draw();
-    forceRender();
     clearSelectedCard();
+    forceRender();
   }, []);
 
   const onEmptyPileClicked = (
@@ -65,8 +65,7 @@ export const GameHandler: React.FC = ({ children }) => {
     pile?: number
   ) => {
     if (from === "stock") {
-      gameRef.current.draw();
-      clearSelectedCard();
+      draw();
       return;
     }
     if (from === "waste") {
@@ -203,10 +202,7 @@ export const GameHandler: React.FC = ({ children }) => {
       (card): ICardPileCard => {
         return {
           card,
-          onClick: () => {
-            gameRef.current.draw();
-            clearSelectedCard();
-          },
+          onClick: draw,
           selected: false
         };
       }
