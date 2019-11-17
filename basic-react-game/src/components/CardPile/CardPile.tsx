@@ -43,7 +43,7 @@ export const CardPile: React.FC<ICardPileProps> = ({
       left: pileXPosition,
       border: shouldShowBorder ? "1px solid red" : ""
     }),
-    [shouldShowBorder]
+    [shouldShowBorder, pileWidth, pileXPosition]
   );
 
   return (
