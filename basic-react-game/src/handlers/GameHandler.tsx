@@ -26,9 +26,7 @@ export const GameHandler: React.FC = ({ children }) => {
   const gameRef = useRef(new KlondikeGame());
   const escapePressed = useKeyPress("Escape");
 
-  const clearSelectedCard = () => {
-    setSelectedCard(null);
-  };
+  const clearSelectedCard = () => setSelectedCard(null);
 
   if (escapePressed && selectedCard !== null) {
     clearSelectedCard();

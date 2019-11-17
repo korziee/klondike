@@ -60,6 +60,7 @@ import { ReactComponent as QueenOfClubs } from "../../svgs/QC.svg";
 import { ReactComponent as QueenOfDiamonds } from "../../svgs/QD.svg";
 import { ReactComponent as QueenOfHearts } from "../../svgs/QH.svg";
 import { ReactComponent as QueenOfSpades } from "../../svgs/QS.svg";
+import { ReactComponent as EmptyCard } from "../../svgs/EmptyCard.svg";
 
 export interface IGameCardProps {
   card: Card;
@@ -224,6 +225,31 @@ export const GameCard: React.FC<IGameCardProps> = ({
       onClick={onClickNoProgation}
     >
       {getCard()}
+    </div>
+  );
+};
+
+export interface IEmptyGameCardProps {
+  onClick: () => void;
+}
+
+export const EmptyGameCard: React.FC<IEmptyGameCardProps> = ({ onClick }) => {
+  const onClickNoProgation = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      event.stopPropagation();
+      onClick();
+    },
+    [onClick]
+  );
+
+  return (
+    <div
+      className={`GameCard ${
+        typeof onClick !== "undefined" ? "-hasOnClick" : ""
+      }`}
+      onClick={onClickNoProgation}
+    >
+      <EmptyCard />
     </div>
   );
 };

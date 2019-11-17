@@ -1,7 +1,8 @@
 import { Card } from "engine/lib/classes/Card";
 import React, { useMemo } from "react";
 import useDimensions from "react-use-dimensions";
-import { GameCard } from "../GameCard";
+import { GameCard, EmptyGameCard } from "../GameCard";
+
 import "./CardPile.css";
 
 export interface ICardPileCard {
@@ -40,14 +41,16 @@ export const CardPile: React.FC<ICardPileProps> = ({
     (): React.CSSProperties => ({
       position: "absolute",
       width: pileWidth,
-      left: pileXPosition,
-      border: shouldShowBorder ? "1px solid red" : ""
+      left: pileXPosition
     }),
     [shouldShowBorder, pileWidth, pileXPosition]
   );
 
   return (
-    <div ref={ref} style={cardPileStyles} onClick={onEmptyPileClick}>
+    <div ref={ref} style={cardPileStyles}>
+      <div style={{ position: "absolute" }}>
+        <EmptyGameCard onClick={onEmptyPileClick} />
+      </div>
       {width &&
         cards.map((c, i) => {
           // cannot memoize this
