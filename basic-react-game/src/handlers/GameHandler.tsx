@@ -53,10 +53,13 @@ export const GameHandler: React.FC = ({ children }) => {
   }, []);
 
   const draw = useCallback(() => {
+    if (!gameStarted) {
+      return;
+    }
     gameRef.current.draw();
     clearSelectedCard();
     forceRender();
-  }, []);
+  }, [gameStarted]);
 
   const onEmptyPileClicked = (
     from: "tableau" | "foundation" | "waste" | "stock",
