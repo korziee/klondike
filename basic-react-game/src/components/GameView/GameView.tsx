@@ -63,7 +63,8 @@ const GameViewInner: React.FC<IGameViewInnerProps> = ({ containerWidth }) => {
       cards={t}
       fanned
       fanDirection="down"
-      onEmptyPileClick={() => emptyPileClick("tableau", i)}
+      // i + 1 here because the tableau is NOT zero based
+      onEmptyPileClick={() => emptyPileClick("tableau", i + 1)}
     />
   ));
 
