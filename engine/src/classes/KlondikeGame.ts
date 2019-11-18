@@ -161,6 +161,12 @@ export class KlondikeGame implements IKlondikeGame {
       return canMove;
     }
 
+    // this is not tested well enough here
+    this.history.push({
+      move: null,
+      state: this.serialize()
+    });
+
     const cardsToRemove = cards.map(c => this.findCardInGame(c));
 
     cardsToRemove.forEach(c => {
