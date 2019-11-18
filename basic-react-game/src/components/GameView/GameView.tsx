@@ -76,7 +76,7 @@ const GameViewInner: React.FC<IGameViewInnerProps> = ({ containerWidth }) => {
   const bottomRowStyles = useMemo(
     (): React.CSSProperties => ({
       position: "absolute",
-      top: approxCardHeight
+      top: approxCardHeight + containerWidth * 0.02
     }),
     [approxCardHeight]
   );
