@@ -1,10 +1,13 @@
-import React, { useContext, useMemo } from "react";
+import React, { useContext, useMemo, useEffect } from "react";
 import useDimensions from "react-use-dimensions";
+import Modal from "antd/es/modal/";
+import "antd/dist/antd.css";
 import { GameContext } from "../../contexts/GameContext";
 import { getCardPilePosition } from "../../helpers/getCardPilePosition";
 import { getCardPileWidth } from "../../helpers/getCardPileWidth";
 import { CardPile } from "../CardPile";
 import "./GameView.css";
+import Button from "antd/es/button/button";
 
 export interface IGameViewInnerProps {
   containerWidth: number;
@@ -17,8 +20,8 @@ const GameViewInner: React.FC<IGameViewInnerProps> = ({ containerWidth }) => {
     foundation,
     tableau,
     emptyPileClick,
-    undo,
-    start
+    undo
+    // start
   } = useContext(GameContext);
 
   const cardWidth = getCardPileWidth(containerWidth);
@@ -84,7 +87,7 @@ const GameViewInner: React.FC<IGameViewInnerProps> = ({ containerWidth }) => {
   return (
     <>
       {/* TODO: remove when the menu bar exists */}
-      <button onClick={start}>Start</button>
+      {/* <button onClick={start}>Start</button> */}
       <button onClick={undo}>Undo</button>
       <div style={topRowStyles}>
         <div>
@@ -104,6 +107,64 @@ export const GameView: React.FC = () => {
   // we want EVERY card to be the same size, so we need to base this off of the fact that there are going to be max 7 tableau cards on the horizonatal plane at any given time
   // Assume that this view is 100%, we should only provide bare margins
   const [ref, { width }] = useDimensions();
+
+  const { start } = useContext(GameContext);
+
+  // This could be moved out into it's own little component
+  useEffect(() => {
+    if (!start) {
+      return;
+    }
+    const modal = Modal.confirm({
+      // get rid of the (!) icon
+      icon: null,
+      centered: true,
+      // get's rid of the cancel button
+      okCancel: false,
+      // get's rid of the ok button
+      okButtonProps: {
+        hidden: true
+      },
+      title: "Select your draw type",
+      content: (
+        <div style={{ display: "flex", justifyContent: "space-around" }}>
+          <Button
+            onClick={() => {
+              start();
+              modal.destroy();
+            }}
+            style={{
+              height: "100px",
+              width: "100px",
+              backgroundColor: "lightblue",
+              fontSize: "1.5em",
+              fontWeight: "bolder"
+            }}
+          >
+            1 Card
+          </Button>
+          <div>
+            <Button
+              disabled
+              style={{
+                height: "100px",
+                width: "100px",
+                backgroundColor: "indianred",
+                fontSize: "1.5em",
+                fontWeight: "bolder"
+              }}
+            >
+              3 Card
+            </Button>
+            <div>Coming soon..</div>
+          </div>
+        </div>
+      )
+    });
+    return () => {
+      modal.destroy();
+    };
+  }, [start]);
 
   return (
     <div className="GameView">
