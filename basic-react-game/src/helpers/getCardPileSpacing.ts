@@ -1,5 +1,5 @@
 export const getCardPileSpacing = (containerWidth: number) => {
-  const cardSpacingPercentage = 2 / 100; // 2%
+  const cardSpacingPercentage = 4 / 100;
 
   return cardSpacingPercentage * containerWidth;
 };
