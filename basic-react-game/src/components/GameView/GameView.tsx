@@ -82,7 +82,7 @@ const GameViewInner: React.FC<IGameViewInnerProps> = ({ containerWidth }) => {
       position: "absolute",
       top: approxCardHeight + containerWidth * 0.05
     }),
-    [approxCardHeight]
+    [approxCardHeight, containerWidth]
   );
 
   return (

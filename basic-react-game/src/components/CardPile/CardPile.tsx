@@ -35,15 +35,13 @@ export const CardPile: React.FC<ICardPileProps> = ({
 }) => {
   const [ref, { width }] = useDimensions();
 
-  const shouldShowBorder = !cards || !(cards && cards.length > 0);
-
   const cardPileStyles = useMemo(
     (): React.CSSProperties => ({
       position: "absolute",
       width: pileWidth,
       left: pileXPosition
     }),
-    [shouldShowBorder, pileWidth, pileXPosition]
+    [pileWidth, pileXPosition]
   );
 
   return (
