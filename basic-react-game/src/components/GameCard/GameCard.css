@@ -12,3 +12,9 @@
 .GameCard.-hasOnClick:hover {
   cursor: pointer;
 }
+
+.GameCard.-empty svg rect {
+  /* --color1: red; */
+  stroke: var(--color3);
+  stroke-opacity: 0.4;
+}

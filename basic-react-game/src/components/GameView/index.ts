@@ -1,1 +1,1 @@
-export { GameView as GameViewNew } from "./GameView";
+export { GameView } from "./GameView";

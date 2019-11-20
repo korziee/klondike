@@ -1,4 +1,4 @@
-import React, { useContext, useMemo, useEffect } from "react";
+import React, { useContext, useMemo, useEffect, useState } from "react";
 import useDimensions from "react-use-dimensions";
 import Modal from "antd/es/modal/";
 import "antd/dist/antd.css";
@@ -8,6 +8,7 @@ import { getCardPileWidth } from "../../helpers/getCardPileWidth";
 import { CardPile } from "../CardPile";
 import "./GameView.css";
 import Button from "antd/es/button/button";
+import { OpacityWrapper } from "../OpacityWrapper/OpacityWrapper";
 
 export interface IGameViewInnerProps {
   containerWidth: number;
@@ -79,7 +80,7 @@ const GameViewInner: React.FC<IGameViewInnerProps> = ({ containerWidth }) => {
   const bottomRowStyles = useMemo(
     (): React.CSSProperties => ({
       position: "absolute",
-      top: approxCardHeight + containerWidth * 0.02
+      top: approxCardHeight + containerWidth * 0.05
     }),
     [approxCardHeight]
   );
@@ -109,6 +110,7 @@ export const GameView: React.FC = () => {
   const [ref, { width }] = useDimensions();
 
   const { start } = useContext(GameContext);
+  const [started, setStarted] = useState(false);
 
   // This could be moved out into it's own little component
   useEffect(() => {
@@ -131,12 +133,14 @@ export const GameView: React.FC = () => {
           <Button
             onClick={() => {
               start();
+              setStarted(true);
               modal.destroy();
             }}
             style={{
               height: "100px",
               width: "100px",
-              backgroundColor: "lightblue",
+              backgroundColor: "var(--color-secondary)",
+              color: "white",
               fontSize: "1.5em",
               fontWeight: "bolder"
             }}
@@ -149,7 +153,9 @@ export const GameView: React.FC = () => {
               style={{
                 height: "100px",
                 width: "100px",
-                backgroundColor: "indianred",
+                backgroundColor: "var(--color-secondary)",
+                opacity: 0.4,
+                color: "white",
                 fontSize: "1.5em",
                 fontWeight: "bolder"
               }}
@@ -167,9 +173,11 @@ export const GameView: React.FC = () => {
   }, [start]);
 
   return (
-    <div className="GameView">
-      {/* GameViewInner does calculation based on the width, so we don't want to return */}
-      <div ref={ref}>{width && <GameViewInner containerWidth={width} />}</div>
-    </div>
+    <OpacityWrapper percentage={started ? 1 : 0.1}>
+      <div className="GameView">
+        {/* GameViewInner does calculation based on the width, so we don't want to return */}
+        <div ref={ref}>{width && <GameViewInner containerWidth={width} />}</div>
+      </div>
+    </OpacityWrapper>
   );
 };

@@ -246,7 +246,7 @@ export const EmptyGameCard: React.FC<IEmptyGameCardProps> = ({ onClick }) => {
     <div
       className={`GameCard ${
         typeof onClick !== "undefined" ? "-hasOnClick" : ""
-      }`}
+      } -empty`}
       onClick={onClickNoProgation}
     >
       <EmptyCard />
