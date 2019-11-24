@@ -1,14 +1,13 @@
 import React from "react";
-import "./App.css";
 import { GameHandler } from "./handlers/GameHandler";
 import { GameView } from "./components/GameView/GameView";
+import { TopBar } from "./components/TopBar";
 
 export const App: React.FC = () => {
   return (
-    <div className="App">
-      <GameHandler>
-        <GameView />
-      </GameHandler>
-    </div>
+    <GameHandler>
+      <TopBar />
+      <GameView />
+    </GameHandler>
   );
 };

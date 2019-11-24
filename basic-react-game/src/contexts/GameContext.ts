@@ -1,5 +1,9 @@
 import React from "react";
 import { ICardPileCard } from "../components/CardPile";
+import {
+  IHistory,
+  ISerializedKlondikeGame
+} from "engine/lib/classes/KlondikeGame";
 
 export interface IGameContext {
   waste: ICardPileCard[];
@@ -12,6 +16,7 @@ export interface IGameContext {
   ) => void;
   draw: () => void;
   undo: () => void;
+  exportSave: () => null | ISerializedKlondikeGame;
   start: () => void;
 }
 
@@ -21,6 +26,7 @@ const getDefaultGameContextState = (): IGameContext => ({
   tableau: null!,
   foundation: null!,
   emptyPileClick: () => {},
+  exportSave: () => null,
   draw: () => {},
   undo: () => {},
   start: () => {}

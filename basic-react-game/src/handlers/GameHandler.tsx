@@ -52,6 +52,12 @@ export const GameHandler: React.FC = ({ children }) => {
     forceRender();
   }, []);
 
+  const exportSave = useCallback(() => {
+    console.log("Serialized Game State: ", gameRef.current.serialize());
+
+    return gameRef.current.serialize();
+  }, []);
+
   const draw = useCallback(() => {
     if (!gameStarted) {
       return;
@@ -290,6 +296,7 @@ export const GameHandler: React.FC = ({ children }) => {
     waste: getWastePileCards(),
     tableau: getTableauPiles(),
     stock: getStockPileCards(),
+    exportSave: exportSave,
     undo: undo,
     draw: draw,
     start: start

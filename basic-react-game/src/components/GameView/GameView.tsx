@@ -86,19 +86,14 @@ const GameViewInner: React.FC<IGameViewInnerProps> = ({ containerWidth }) => {
   );
 
   return (
-    <>
-      {/* TODO: remove when the menu bar exists */}
-      {/* <button onClick={start}>Start</button> */}
-      <button onClick={undo}>Undo</button>
-      <div style={topRowStyles}>
-        <div>
-          {stockPile}
-          {wastePile}
-          {foundationPile}
-        </div>
-        <div style={bottomRowStyles}>{tableauPiles}</div>
+    <div style={topRowStyles}>
+      <div>
+        {stockPile}
+        {wastePile}
+        {foundationPile}
       </div>
-    </>
+      <div style={bottomRowStyles}>{tableauPiles}</div>
+    </div>
   );
 };
 

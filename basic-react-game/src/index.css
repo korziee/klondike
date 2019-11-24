@@ -6,6 +6,8 @@
   --color5: rgba(195, 195, 195, 1);
   --color-pop: rgba(74, 173, 82, 1);
   --color-gloomy: rgba(44, 85, 48, 1);
+
+  --max-width: 960px;
 }
 
 body {
