@@ -1,2 +1,2 @@
 src
-lib/classes/*.test.js
+lib/classes/**.test.**
