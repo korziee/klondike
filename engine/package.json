@@ -1,7 +1,7 @@
 {
-  "name": "engine",
-  "version": "1.0.0",
-  "main": "index.js",
+  "name": "@korziee/klondike",
+  "version": "0.0.0-beta.0",
+  "main": "lib/index.js",
   "license": "MIT",
   "scripts": {
     "test": "ava src/**/*.test.ts",
@@ -17,13 +17,13 @@
     ]
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.144",
     "ava": "^2.4.0",
     "ts-node": "^8.4.1",
     "typescript": "^3.6.4"
   },
   "dependencies": {
     "@korziee/helpers": "git+ssh://git@github.com:korziee/helpers.git",
-    "@types/lodash": "^4.14.144",
     "lodash": "^4.17.15"
   }
 }

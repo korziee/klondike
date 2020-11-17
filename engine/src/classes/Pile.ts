@@ -9,6 +9,7 @@ export interface ISerializedPile {
 
 export interface IPile extends ISerializable<Pile, ISerializedPile> {
   getCards(): Card[];
+  getTopCard(): Card | null;
   setCards(cards: Card[]): void;
   addCards(cards: Card[]): void;
   removeCards(cards: Card[]): boolean;
@@ -36,12 +37,17 @@ export class Pile implements IPile {
 
   serialize() {
     return {
-      cards: this.cards.map(c => c.serialize())
+      cards: this.cards.map((c) => c.serialize()),
     };
   }
 
   static unserialize({ cards }: ISerializedPile) {
-    return new Pile(cards.map(c => Card.unserialize(c)));
+    return new Pile(cards.map((c) => Card.unserialize(c)));
+  }
+
+  getTopCard(): Card | null {
+    const amountOfCards = this.cards.length;
+    return amountOfCards > 0 ? this.cards[amountOfCards - 1] : null;
   }
 
   getCards(): Card[] {
@@ -77,9 +83,9 @@ export class Pile implements IPile {
     let cardsRemovedCount = 0;
 
     // find all cards that match the cards parameter and remove
-    this.cards = this.cards.filter(card => {
+    this.cards = this.cards.filter((card) => {
       const isInRemoveList = cards.find(
-        c => card.getRank() === c.getRank() && card.getSuit() === c.getSuit()
+        (c) => card.getRank() === c.getRank() && card.getSuit() === c.getSuit()
       );
 
       if (isInRemoveList) {

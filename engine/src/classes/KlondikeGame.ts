@@ -47,6 +47,8 @@ export interface IKlondikeGame
   // returns a boolean denoting whether or not an actual draw was made
   draw(): boolean;
 
+  canDrawCard(): boolean;
+
   // undo's the last move in the history!
   undo(): void;
 
@@ -57,6 +59,8 @@ export interface IKlondikeGame
   canMoveCardsAnywhere(cards: Card[]): ICanMoveCardAnywhereResult;
 
   moveCardsAnywhere(cards: Card[]): ICanMoveCardAnywhereResult;
+
+  getAvailableMoves(): Move[] | null;
 
   history: IHistory[];
   tableau: Tableau;
@@ -75,39 +79,39 @@ export class KlondikeGame implements IKlondikeGame {
   private findCardInGame(card: Card): IFindCardResult {
     const isInStock = this.stock
       .getCards()
-      .find(c => _.isEqual(c.serialize(), card.serialize()));
+      .find((c) => _.isEqual(c.serialize(), card.serialize()));
     if (isInStock) {
       return {
-        location: "stock"
+        location: "stock",
       };
     }
     const isInWaste = this.waste
       .getCards()
-      .find(c => _.isEqual(c.serialize(), card.serialize()));
+      .find((c) => _.isEqual(c.serialize(), card.serialize()));
     if (isInWaste) {
       return {
-        location: "waste"
+        location: "waste",
       };
     }
     const isInFoundation = this.foundation
       .getPileForSuit(card.getSuit())
       .getCards()
-      .find(c => _.isEqual(c.serialize(), card.serialize()));
+      .find((c) => _.isEqual(c.serialize(), card.serialize()));
     if (isInFoundation) {
       return {
-        location: "foundation"
+        location: "foundation",
       };
     }
     for (let i = 1; i <= 7; i += 1) {
       const isInTableau = this.tableau
         .getTableauPile(i)
         .getCards()
-        .find(c => _.isEqual(c.serialize(), card.serialize()));
+        .find((c) => _.isEqual(c.serialize(), card.serialize()));
 
       if (isInTableau) {
         return {
           location: "tableau",
-          locationPile: i
+          locationPile: i,
         };
       }
     }
@@ -115,11 +119,115 @@ export class KlondikeGame implements IKlondikeGame {
     throw new Error("cannot find card in game!");
   }
 
+  public getAvailableMoves(): Move[] {
+    const moves: Move[] = [];
+
+    const topOfWaste = this.waste.getTopCard();
+
+    this.foundation.getPiles().forEach((pile) => {
+      // can move the card from the top of the waste pile to either; foundation
+      if (topOfWaste) {
+        if (pile.canAddCards([topOfWaste])) {
+          moves.push(
+            new Move({ from: "waste", to: "foundation", cards: [topOfWaste] })
+          );
+        }
+      }
+
+      // can move the card from the foundation to the tableau
+      const topCardOfPile = pile.getTopCard();
+
+      if (topCardOfPile) {
+        const canAdd = this.tableau.canAddCardAnywhere(topCardOfPile);
+
+        console.log("from foundation tableau", topCardOfPile, canAdd);
+
+        if (canAdd !== -1) {
+          moves.push(
+            new Move({
+              from: "foundation",
+              to: "tableau",
+              cards: [topCardOfPile],
+              meta: {
+                toPile: canAdd,
+              },
+            })
+          );
+        }
+      }
+    });
+
+    this.tableau.getPiles().forEach((pile, pileIndex) => {
+      if (topOfWaste) {
+        // can move the card from the top of the waste pile to either; foundation or tableau
+        if (pile.canAddCards([topOfWaste])) {
+          moves.push(
+            new Move({
+              from: "waste",
+              to: "tableau",
+              cards: [topOfWaste],
+              meta: {
+                toPile: pileIndex + 1,
+              },
+            })
+          );
+        }
+      }
+
+      const movableCards = pile.getMovableGroupsOfCards();
+
+      movableCards.forEach((cards) => {
+        if (cards.length === 1) {
+          // can move a single card from the tableau to the foundation
+          const canAddToFoundation = this.foundation
+            .getPileForSuit(cards[0].getSuit())
+            .canAddCards(cards);
+
+          if (canAddToFoundation) {
+            moves.push(
+              new Move({
+                cards: cards,
+                from: "tableau",
+                to: "foundation",
+                meta: {
+                  fromPile: pileIndex + 1,
+                },
+              })
+            );
+          }
+        }
+
+        // can move an array of cards from the tableau to the tableau
+        this.tableau.getPiles().forEach((pileToMoveTo, pileToMoveToIndex) => {
+          if (pileToMoveToIndex === pileIndex) {
+            return;
+          }
+
+          if (pileToMoveTo.canAddCards(cards)) {
+            moves.push(
+              new Move({
+                from: "tableau",
+                to: "tableau",
+                cards: cards,
+                meta: {
+                  fromPile: pileIndex + 1,
+                  toPile: pileToMoveToIndex + 1,
+                },
+              })
+            );
+          }
+        });
+      });
+    });
+
+    return moves;
+  }
+
   canMoveCardsAnywhere(cards: Card[]): ICanMoveCardAnywhereResult {
     if (typeof cards === "undefined" || cards.length < 1) {
       return {
         invalidMessage: "Cannot move cards if no cards are passed",
-        valid: false
+        valid: false,
       };
     }
 
@@ -131,7 +239,7 @@ export class KlondikeGame implements IKlondikeGame {
       if (canAddToFoundation) {
         return {
           to: "foundation",
-          valid: true
+          valid: true,
         };
       }
     }
@@ -143,14 +251,14 @@ export class KlondikeGame implements IKlondikeGame {
         return {
           to: "tableau",
           toPile: i,
-          valid: true
+          valid: true,
         };
       }
     }
 
     return {
       invalidMessage: "cannot add to either the tableau or foundation",
-      valid: false
+      valid: false,
     };
   }
 
@@ -164,12 +272,12 @@ export class KlondikeGame implements IKlondikeGame {
     // this is not tested well enough here
     this.history.push({
       move: null,
-      state: this.serialize()
+      state: this.serialize(),
     });
 
-    const cardsToRemove = cards.map(c => this.findCardInGame(c));
+    const cardsToRemove = cards.map(this.findCardInGame);
 
-    cardsToRemove.forEach(c => {
+    cardsToRemove.forEach((c) => {
       switch (c.location) {
         case "stock":
           this.stock.removeCards(cards);
@@ -196,11 +304,15 @@ export class KlondikeGame implements IKlondikeGame {
     }
   }
 
-  undo(): void {
+  /**
+   * Undoes the previous move
+   *
+   * @returns Boolean dictating whether or not the undo was successful
+   */
+  undo(): boolean {
     // using history, we need to look at the last move, and set the state back using the ovveride `set` methods
     if (this.history.length === 0) {
-      console.warn("cannot undo if there is no history");
-      return;
+      return false;
     }
 
     const lastMove = this.history[this.history.length - 1];
@@ -210,7 +322,7 @@ export class KlondikeGame implements IKlondikeGame {
       history,
       stock,
       tableau,
-      waste
+      waste,
     } = KlondikeGame.unserialize(lastMove.state);
 
     this.foundation = foundation;
@@ -220,10 +332,11 @@ export class KlondikeGame implements IKlondikeGame {
     this.waste = waste;
 
     this.history.pop();
+
+    return true;
   }
 
-  draw(): boolean {
-    // if there are no cards in the stock or waste, we cannot draw
+  canDrawCard(): boolean {
     if (
       this.stock.getCards().length === 0 &&
       this.waste.getCards().length === 0
@@ -231,17 +344,26 @@ export class KlondikeGame implements IKlondikeGame {
       return false;
     }
 
+    return true;
+  }
+
+  draw(): boolean {
+    // if there are no cards in the stock or waste, we cannot draw
+    if (!this.canDrawCard()) {
+      return false;
+    }
+
     // add this into the history so that user's can undo this
     this.history.push({
       move: null,
-      state: this.serialize()
+      state: this.serialize(),
     });
 
     // stock is empty, we need to transfer all of the cards from the waste into the stock
     if (this.stock.getCards().length === 0) {
       const cardsInWaste = this.waste.getCards();
       const cardsInWasteTurnedDown = cardsInWaste
-        .map(c => {
+        .map((c) => {
           c.turnDown();
           return c;
         })
@@ -271,7 +393,7 @@ export class KlondikeGame implements IKlondikeGame {
       history: this.history,
       stock: this.stock.serialize(),
       tableau: this.tableau.serialize(),
-      waste: this.waste.serialize()
+      waste: this.waste.serialize(),
     };
   }
   static unserialize(serializedGame: ISerializedKlondikeGame): KlondikeGame {
@@ -291,7 +413,7 @@ export class KlondikeGame implements IKlondikeGame {
     this._reset();
 
     const shuffledCards = _.shuffle(getSerializedDeck()).map(
-      c => new Card(c.suit, c.rank, c.upturned)
+      (c) => new Card(c.suit, c.rank, c.upturned)
     );
 
     // sets up the tableau
@@ -314,7 +436,7 @@ export class KlondikeGame implements IKlondikeGame {
       new TableauPile([]),
       new TableauPile([]),
       new TableauPile([]),
-      new TableauPile([])
+      new TableauPile([]),
     ]);
     this.foundation = new Foundation();
     this.waste = new Waste([]);
@@ -325,7 +447,7 @@ export class KlondikeGame implements IKlondikeGame {
   validateMove(move: Move): IMoveValidationResult {
     const returner = (valid: boolean, invalidMessage?: string) => ({
       valid,
-      invalidMessage
+      invalidMessage,
     });
 
     const specificGameValidations = () => {
@@ -444,19 +566,19 @@ export class KlondikeGame implements IKlondikeGame {
     const validationLookupTable = {
       waste: {
         from: validateMovesFromWaste,
-        to: validateMovesToWaste
+        to: validateMovesToWaste,
       },
       stock: {
-        from: validateMovesFromStock
+        from: validateMovesFromStock,
       },
       tableau: {
         from: validateMovesFromTableau,
-        to: validateMovesToTableau
+        to: validateMovesToTableau,
       },
       foundation: {
         from: validateMovesFromFoundation,
-        to: validateMovesToFoundation
-      }
+        to: validateMovesToFoundation,
+      },
     };
 
     // do the initial validations
@@ -489,7 +611,7 @@ export class KlondikeGame implements IKlondikeGame {
 
     this.history.push({
       move: move.serialize(),
-      state: this.serialize()
+      state: this.serialize(),
     });
 
     if (move.from === "foundation" && move.to === "tableau") {

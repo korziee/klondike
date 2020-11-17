@@ -3,9 +3,10 @@ import { Pile, ISerializedPile, IPile } from "./Pile";
 import { Card } from "./Card";
 import {
   sortCardsBySequence,
-  getCardNumericalRank
+  getCardNumericalRank,
 } from "../helpers/sortCardsBySequence";
 import { TSuit } from "../types/TSuit";
+import { getNextRankForCurrentRank } from "../helpers/getNextRankForRank";
 
 const isAlternating = (
   cardA: Card,
@@ -17,7 +18,7 @@ const isAlternating = (
   if (cardAColour === cardBColour) {
     return {
       ok: false,
-      error: "card colours are equal"
+      error: "card colours are equal",
     };
   }
 
@@ -27,19 +28,19 @@ const isAlternating = (
   if (cardANumericalRank === cardBNumericalRank) {
     return {
       ok: false,
-      error: "card numerical rank is the same"
+      error: "card numerical rank is the same",
     };
   }
 
   if (cardANumericalRank - cardBNumericalRank !== 1) {
     return {
       ok: false,
-      error: "cards are not alternating rank"
+      error: "cards are not alternating rank",
     };
   }
 
   return {
-    ok: true
+    ok: true,
   };
 };
 
@@ -61,12 +62,10 @@ const getColourForSuit = (suit: TSuit): "black" | "red" => {
   }
 };
 
-// export interface ISerializedTableauPile {
-//   // cards: ISerializedCard[];
-// }
-
 export interface ITableauPile
-  extends ISerializable<TableauPile, ISerializedPile> {}
+  extends ISerializable<TableauPile, ISerializedPile> {
+  getMovableGroupsOfCards(): Card[][];
+}
 
 export class TableauPile extends Pile implements ITableauPile {
   constructor(cards: Card[]) {
@@ -85,10 +84,39 @@ export class TableauPile extends Pile implements ITableauPile {
 
   private getCardInPile(cardToFind: Card) {
     return this.getCards().find(
-      c =>
+      (c) =>
         c.getRank() === cardToFind.getRank() &&
         c.getSuit() === cardToFind.getSuit()
     );
+  }
+
+  getMovableGroupsOfCards(): Card[][] {
+    const movable: Card[][] = [];
+
+    const topCard = this.getTopCard();
+
+    if (topCard) {
+      movable.push([topCard]);
+    }
+
+    this.getCards().forEach((card, i) => {
+      if (!card.getUpturned()) {
+        return;
+      }
+
+      const nextCard = this.getCards()[i + 1];
+
+      if (!nextCard) {
+        return;
+      }
+
+      if (getNextRankForCurrentRank(card.getRank()) === nextCard.getRank()) {
+        const nextCards = this.getCards().slice(i);
+        movable.push(nextCards);
+      }
+    });
+
+    return movable;
   }
 
   shuffle() {
@@ -215,7 +243,7 @@ export class TableauPile extends Pile implements ITableauPile {
 
   static unserialize(unserializedData: ISerializedPile): TableauPile {
     return new TableauPile(
-      unserializedData.cards.map(c => Card.unserialize(c))
+      unserializedData.cards.map((c) => Card.unserialize(c))
     );
   }
 }

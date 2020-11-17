@@ -14,6 +14,7 @@ export interface ISerializedFoundation {
 
 export interface IFoundation
   extends ISerializable<Foundation, ISerializedFoundation> {
+  getPiles(): Pile[];
   addCard(card: Card): void;
   removeCard(card: Card): void;
   getPileForSuit(suit: TSuit): Pile;
@@ -24,6 +25,10 @@ export class Foundation implements IFoundation {
   private spades: FoundationPile = new FoundationPile("Spades");
   private diamonds: FoundationPile = new FoundationPile("Diamonds");
   private clubs: FoundationPile = new FoundationPile("Clubs");
+
+  getPiles() {
+    return [this.clubs, this.spades, this.diamonds, this.hearts];
+  }
 
   getPileForSuit(suit: TSuit): FoundationPile {
     switch (suit) {
@@ -61,7 +66,7 @@ export class Foundation implements IFoundation {
       hearts: this.hearts.serialize(),
       spades: this.spades.serialize(),
       clubs: this.clubs.serialize(),
-      diamonds: this.diamonds.serialize()
+      diamonds: this.diamonds.serialize(),
     };
   }
 
@@ -70,22 +75,22 @@ export class Foundation implements IFoundation {
 
     foundation.spades = FoundationPile.unserialize({
       cards: data.spades.cards,
-      suit: data.spades.suit
+      suit: data.spades.suit,
     });
 
     foundation.hearts = FoundationPile.unserialize({
       cards: data.hearts.cards,
-      suit: data.hearts.suit
+      suit: data.hearts.suit,
     });
 
     foundation.clubs = FoundationPile.unserialize({
       cards: data.clubs.cards,
-      suit: data.clubs.suit
+      suit: data.clubs.suit,
     });
 
     foundation.diamonds = FoundationPile.unserialize({
       cards: data.diamonds.cards,
-      suit: data.diamonds.suit
+      suit: data.diamonds.suit,
     });
 
     return foundation;

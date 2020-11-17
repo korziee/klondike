@@ -22,10 +22,16 @@ export interface ITableau extends ISerializable<Tableau, ISerializedTableau> {
    * return the index of the pile if it can be added, otherwise null!
    */
   canAddCardAnywhere(card: Card): number | null;
+
+  getPiles(): TableauPile[];
 }
 
 export class Tableau implements ITableau {
   constructor(private piles: TableauPile[]) {}
+
+  getPiles() {
+    return this.piles;
+  }
 
   /** non zero based (e.g. pile 1 will return the first pile!) */
   getTableauPile(pileNumber: number): TableauPile {
@@ -55,7 +61,7 @@ export class Tableau implements ITableau {
    */
   canAddCardAnywhere(card: Card): number | null {
     // go through each pile and try to add
-    const canAdd = this.piles.findIndex(pile => {
+    const canAdd = this.piles.findIndex((pile) => {
       return pile.canAddCards([card]);
     });
 
@@ -67,14 +73,14 @@ export class Tableau implements ITableau {
   }
 
   static unserialize(serializedData: ISerializedTableau): Tableau {
-    const piles = serializedData.piles.map(p => TableauPile.unserialize(p));
+    const piles = serializedData.piles.map((p) => TableauPile.unserialize(p));
     const tableau = new Tableau(piles);
     return tableau;
   }
 
   serialize(): ISerializedTableau {
     return {
-      piles: this.piles.map(s => s.serialize())
+      piles: this.piles.map((s) => s.serialize()),
     };
   }
 }
