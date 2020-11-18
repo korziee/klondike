@@ -142,7 +142,7 @@ export class KlondikeGame implements IKlondikeGame {
 
         console.log("from foundation tableau", topCardOfPile, canAdd);
 
-        if (canAdd !== -1) {
+        if (canAdd) {
           moves.push(
             new Move({
               from: "foundation",
