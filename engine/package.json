@@ -17,13 +17,13 @@
     ]
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.144",
+    "@types/lodash.isequal": "^4.5.5",
     "ava": "^2.4.0",
     "ts-node": "^8.4.1",
     "typescript": "^3.6.4"
   },
   "dependencies": {
-    "@korziee/helpers": "git+ssh://git@github.com:korziee/helpers.git",
-    "lodash": "^4.17.15"
+    "@korziee/helpers": "1.0.0",
+    "lodash.isequal": "^4.5.0"
   }
 }

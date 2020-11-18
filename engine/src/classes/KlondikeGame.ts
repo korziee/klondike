@@ -1,13 +1,14 @@
+import { shuffle } from "@korziee/helpers";
+import isEqual from "lodash.isequal";
+import { getSerializedDeck } from "../helpers/getSerializedDeck";
 import { ISerializable } from "../types/ISerializable";
 import { Card } from "./Card";
-import { ISerializedFoundation, Foundation } from "./Foundation";
-import { ISerializedTableau, Tableau } from "./Tableau";
-import { ISerializedWaste, Waste } from "./Waste";
-import { ISerializedStock, Stock } from "./Stock";
-import { TableauPile } from "./TableauPile";
-import { getSerializedDeck } from "../helpers/getSerializedDeck";
+import { Foundation, ISerializedFoundation } from "./Foundation";
 import { ISerializedMove, Move } from "./Move";
-import * as _ from "lodash";
+import { ISerializedStock, Stock } from "./Stock";
+import { ISerializedTableau, Tableau } from "./Tableau";
+import { TableauPile } from "./TableauPile";
+import { ISerializedWaste, Waste } from "./Waste";
 
 export interface IHistory {
   move: ISerializedMove;
@@ -79,7 +80,7 @@ export class KlondikeGame implements IKlondikeGame {
   private findCardInGame(card: Card): IFindCardResult {
     const isInStock = this.stock
       .getCards()
-      .find((c) => _.isEqual(c.serialize(), card.serialize()));
+      .find((c) => isEqual(c.serialize(), card.serialize()));
     if (isInStock) {
       return {
         location: "stock",
@@ -87,7 +88,7 @@ export class KlondikeGame implements IKlondikeGame {
     }
     const isInWaste = this.waste
       .getCards()
-      .find((c) => _.isEqual(c.serialize(), card.serialize()));
+      .find((c) => isEqual(c.serialize(), card.serialize()));
     if (isInWaste) {
       return {
         location: "waste",
@@ -96,7 +97,7 @@ export class KlondikeGame implements IKlondikeGame {
     const isInFoundation = this.foundation
       .getPileForSuit(card.getSuit())
       .getCards()
-      .find((c) => _.isEqual(c.serialize(), card.serialize()));
+      .find((c) => isEqual(c.serialize(), card.serialize()));
     if (isInFoundation) {
       return {
         location: "foundation",
@@ -106,7 +107,7 @@ export class KlondikeGame implements IKlondikeGame {
       const isInTableau = this.tableau
         .getTableauPile(i)
         .getCards()
-        .find((c) => _.isEqual(c.serialize(), card.serialize()));
+        .find((c) => isEqual(c.serialize(), card.serialize()));
 
       if (isInTableau) {
         return {
@@ -412,7 +413,7 @@ export class KlondikeGame implements IKlondikeGame {
   deal() {
     this._reset();
 
-    const shuffledCards = _.shuffle(getSerializedDeck()).map(
+    const shuffledCards = shuffle(getSerializedDeck()).map(
       (c) => new Card(c.suit, c.rank, c.upturned)
     );
 

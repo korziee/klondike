@@ -1,7 +1,6 @@
 import { Card, ISerializedCard } from "./Card";
 import { shuffle } from "@korziee/helpers";
 import { ISerializable } from "../types/ISerializable";
-import * as _ from "lodash";
 
 export interface ISerializedPile {
   cards: ISerializedCard[];
@@ -111,11 +110,6 @@ export class Pile implements IPile {
     return cardsThatWereCleared;
   }
 
-  /**
-   * Uses the lodash method _.shuffle to shuffle the array.
-   *
-   * @note Lodash shuffle uses the fisher yates algoritm to shuffle
-   */
   shuffle(): void {
     const shuffledCards = shuffle<Card>(this.cards);
     this.cards = shuffledCards;

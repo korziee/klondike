@@ -1,9 +1,8 @@
 import { ISerializable } from "../types/ISerializable";
-import { Pile, ISerializedPile } from "./Pile";
+import { Pile } from "./Pile";
 import { Card } from "./Card";
 import { TSuit } from "../types/TSuit";
 import { FoundationPile, ISerializedFoundationPile } from "./FoundationPile";
-import * as _ from "lodash";
 
 export interface ISerializedFoundation {
   hearts: ISerializedFoundationPile;

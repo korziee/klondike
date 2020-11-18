@@ -1,38 +1,36 @@
-import test, { serial } from "ava";
-import { KlondikeGame, ISerializedKlondikeGame } from "./KlondikeGame";
+import test from "ava";
+
 import { Card } from "./Card";
-import { getSerializedDeck } from "../helpers/getSerializedDeck";
-import * as _ from "lodash";
-import { TableauPile } from "./TableauPile";
-import { Foundation } from "./Foundation";
 import { FoundationPile } from "./FoundationPile";
+import { ISerializedKlondikeGame, KlondikeGame } from "./KlondikeGame";
 import { Move } from "./Move";
+import { TableauPile } from "./TableauPile";
 
 const getEmptySerializedGame = (): ISerializedKlondikeGame => ({
   foundation: {
     clubs: {
       suit: "Clubs",
-      cards: []
+      cards: [],
     },
     hearts: {
       suit: "Hearts",
-      cards: []
+      cards: [],
     },
     diamonds: {
       suit: "Diamonds",
-      cards: []
+      cards: [],
     },
     spades: {
       suit: "Spades",
-      cards: []
-    }
+      cards: [],
+    },
   },
   stock: {
-    cards: []
+    cards: [],
   },
   history: [],
   waste: {
-    cards: []
+    cards: [],
   },
   tableau: {
     piles: [
@@ -42,202 +40,202 @@ const getEmptySerializedGame = (): ISerializedKlondikeGame => ({
       { cards: [] },
       { cards: [] },
       { cards: [] },
-      { cards: [] }
-    ]
-  }
+      { cards: [] },
+    ],
+  },
 });
 
-test("canMoveCardsAnywhere() returns true if atleast one move can be made", t => {
+test("canMoveCardsAnywhere() returns true if atleast one move can be made", (t) => {
   const serializedGame = getEmptySerializedGame();
   serializedGame.tableau.piles[0].cards.push(
     {
       suit: "Clubs",
       rank: "10",
-      upturned: true
+      upturned: true,
     },
     {
       suit: "Diamonds",
       rank: "9",
-      upturned: true
+      upturned: true,
     }
   );
 
   serializedGame.tableau.piles[1].cards.push({
     suit: "Diamonds",
     rank: "Jack",
-    upturned: true
+    upturned: true,
   });
   serializedGame.tableau.piles[2].cards.push({
     suit: "Spades",
     rank: "10",
-    upturned: true
+    upturned: true,
   });
   const game = KlondikeGame.unserialize(serializedGame);
 
   const canMove = game.canMoveCardsAnywhere([
     new Card("Clubs", "10", true),
-    new Card("Diamonds", "9", true)
+    new Card("Diamonds", "9", true),
   ]);
   t.true(canMove.valid);
 });
 
-test("moveCardsAnywhere() moves the cards if atleast one move can be made", t => {
+test("moveCardsAnywhere() moves the cards if atleast one move can be made", (t) => {
   const serializedGame = getEmptySerializedGame();
   serializedGame.tableau.piles[0].cards.push(
     {
       suit: "Clubs",
       rank: "10",
-      upturned: true
+      upturned: true,
     },
     {
       suit: "Diamonds",
       rank: "9",
-      upturned: true
+      upturned: true,
     }
   );
 
   serializedGame.tableau.piles[1].cards.push({
     suit: "Diamonds",
     rank: "Jack",
-    upturned: true
+    upturned: true,
   });
   serializedGame.tableau.piles[2].cards.push({
     suit: "Spades",
     rank: "10",
-    upturned: true
+    upturned: true,
   });
   const game = KlondikeGame.unserialize(serializedGame);
 
   game.moveCardsAnywhere([
     new Card("Clubs", "10", true),
-    new Card("Diamonds", "9", true)
+    new Card("Diamonds", "9", true),
   ]);
 
   t.deepEqual(
     game.tableau
       .getTableauPile(2)
       .getCards()
-      .map(c => c.serialize()),
+      .map((c) => c.serialize()),
     [
       {
         suit: "Diamonds",
         rank: "Jack",
-        upturned: true
+        upturned: true,
       },
       {
         suit: "Clubs",
         rank: "10",
-        upturned: true
+        upturned: true,
       },
       {
         suit: "Diamonds",
         rank: "9",
-        upturned: true
-      }
+        upturned: true,
+      },
     ]
   );
 });
 
-test("moveCardsAnywhere() does not move any cards if no moves can be made", t => {
+test("moveCardsAnywhere() does not move any cards if no moves can be made", (t) => {
   const serializedGame = getEmptySerializedGame();
   serializedGame.tableau.piles[0].cards.push(
     {
       suit: "Clubs",
       rank: "10",
-      upturned: true
+      upturned: true,
     },
     {
       suit: "Diamonds",
       rank: "9",
-      upturned: true
+      upturned: true,
     }
   );
 
   serializedGame.tableau.piles[1].cards.push({
     suit: "Clubs",
     rank: "Jack",
-    upturned: true
+    upturned: true,
   });
   serializedGame.tableau.piles[2].cards.push({
     suit: "Spades",
     rank: "10",
-    upturned: true
+    upturned: true,
   });
   const game = KlondikeGame.unserialize(serializedGame);
 
   game.moveCardsAnywhere([
     new Card("Clubs", "10", true),
-    new Card("Diamonds", "9", true)
+    new Card("Diamonds", "9", true),
   ]);
 
   t.deepEqual(
     game.tableau
       .getTableauPile(2)
       .getCards()
-      .map(c => c.serialize()),
+      .map((c) => c.serialize()),
     [
       {
         suit: "Clubs",
         rank: "Jack",
-        upturned: true
-      }
+        upturned: true,
+      },
     ]
   );
 });
 
-test("canMoveCardsAnywhere() returns false if no moves can be made", t => {
+test("canMoveCardsAnywhere() returns false if no moves can be made", (t) => {
   const serializedGame = getEmptySerializedGame();
   serializedGame.tableau.piles[0].cards.push(
     {
       suit: "Clubs",
       rank: "10",
-      upturned: true
+      upturned: true,
     },
     {
       suit: "Diamonds",
       rank: "9",
-      upturned: true
+      upturned: true,
     }
   );
 
   serializedGame.tableau.piles[1].cards.push({
     suit: "Clubs",
     rank: "Jack",
-    upturned: true
+    upturned: true,
   });
   serializedGame.tableau.piles[2].cards.push({
     suit: "Spades",
     rank: "10",
-    upturned: true
+    upturned: true,
   });
   const game = KlondikeGame.unserialize(serializedGame);
 
   const canMove = game.canMoveCardsAnywhere([
     new Card("Clubs", "10", true),
-    new Card("Diamonds", "9", true)
+    new Card("Diamonds", "9", true),
   ]);
 
   t.false(canMove.valid);
 });
 
-test("getHistory() returns the correct history", t => {
+test("getHistory() returns the correct history", (t) => {
   const serializedGame = getEmptySerializedGame();
   serializedGame.tableau.piles[0].cards.push(
     {
       suit: "Clubs",
       rank: "10",
-      upturned: true
+      upturned: true,
     },
     {
       suit: "Diamonds",
       rank: "9",
-      upturned: true
+      upturned: true,
     }
   );
   serializedGame.tableau.piles[1].cards.push({
     suit: "Diamonds",
     rank: "Jack",
-    upturned: true
+    upturned: true,
   });
   const game = KlondikeGame.unserialize(serializedGame);
 
@@ -247,8 +245,8 @@ test("getHistory() returns the correct history", t => {
     cards: [new Card("Clubs", "10", true), new Card("Diamonds", "9", true)],
     meta: {
       fromPile: 1,
-      toPile: 2
-    }
+      toPile: 2,
+    },
   });
 
   game.makeMove(move);
@@ -256,24 +254,24 @@ test("getHistory() returns the correct history", t => {
   t.deepEqual(game.getHistory()[0].move, move.serialize());
 });
 
-test("undo() moves the game state back one move", t => {
+test("undo() moves the game state back one move", (t) => {
   const serializedGame = getEmptySerializedGame();
   serializedGame.tableau.piles[0].cards.push(
     {
       suit: "Clubs",
       rank: "King",
-      upturned: true
+      upturned: true,
     },
     {
       suit: "Diamonds",
       rank: "Queen",
-      upturned: true
+      upturned: true,
     }
   );
   serializedGame.tableau.piles[1].cards.push({
     suit: "Spades",
     rank: "King",
-    upturned: true
+    upturned: true,
   });
   const game = KlondikeGame.unserialize(serializedGame);
 
@@ -283,43 +281,37 @@ test("undo() moves the game state back one move", t => {
     cards: [new Card("Diamonds", "Queen", true)],
     meta: {
       fromPile: 1,
-      toPile: 2
-    }
+      toPile: 2,
+    },
   });
 
   game.makeMove(move);
   game.undo();
-  t.deepEqual(
-    game.tableau
-      .getTableauPile(1)
-      .getCards()[1]
-      .serialize(),
-    {
-      suit: "Diamonds",
-      rank: "Queen",
-      upturned: true
-    }
-  );
+  t.deepEqual(game.tableau.getTableauPile(1).getCards()[1].serialize(), {
+    suit: "Diamonds",
+    rank: "Queen",
+    upturned: true,
+  });
 });
 
-test("undo() removes the last move from the history ", t => {
+test("undo() removes the last move from the history ", (t) => {
   const serializedGame = getEmptySerializedGame();
   serializedGame.tableau.piles[0].cards.push(
     {
       suit: "Clubs",
       rank: "King",
-      upturned: true
+      upturned: true,
     },
     {
       suit: "Diamonds",
       rank: "Queen",
-      upturned: true
+      upturned: true,
     }
   );
   serializedGame.tableau.piles[1].cards.push({
     suit: "Spades",
     rank: "King",
-    upturned: true
+    upturned: true,
   });
   const game = KlondikeGame.unserialize(serializedGame);
 
@@ -329,8 +321,8 @@ test("undo() removes the last move from the history ", t => {
     cards: [new Card("Diamonds", "Queen", true)],
     meta: {
       fromPile: 1,
-      toPile: 2
-    }
+      toPile: 2,
+    },
   });
 
   game.makeMove(move);
@@ -338,24 +330,24 @@ test("undo() removes the last move from the history ", t => {
   t.is(game.history.length, 0);
 });
 
-test("history is cleared on reset", t => {
+test("history is cleared on reset", (t) => {
   const serializedGame = getEmptySerializedGame();
   serializedGame.tableau.piles[0].cards.push(
     {
       suit: "Clubs",
       rank: "King",
-      upturned: true
+      upturned: true,
     },
     {
       suit: "Diamonds",
       rank: "Queen",
-      upturned: true
+      upturned: true,
     }
   );
   serializedGame.tableau.piles[1].cards.push({
     suit: "Spades",
     rank: "King",
-    upturned: true
+    upturned: true,
   });
   const game = KlondikeGame.unserialize(serializedGame);
 
@@ -365,8 +357,8 @@ test("history is cleared on reset", t => {
     cards: [new Card("Diamonds", "Queen", true)],
     meta: {
       fromPile: 1,
-      toPile: 2
-    }
+      toPile: 2,
+    },
   });
 
   game.makeMove(move);
@@ -391,24 +383,24 @@ test("history is cleared on reset", t => {
   t.is(game.getHistory().length, 0);
 });
 
-test("history is modified on every successful move", t => {
+test("history is modified on every successful move", (t) => {
   const serializedGame = getEmptySerializedGame();
   serializedGame.tableau.piles[0].cards.push(
     {
       suit: "Clubs",
       rank: "King",
-      upturned: true
+      upturned: true,
     },
     {
       suit: "Diamonds",
       rank: "Queen",
-      upturned: true
+      upturned: true,
     }
   );
   serializedGame.tableau.piles[1].cards.push({
     suit: "Spades",
     rank: "King",
-    upturned: true
+    upturned: true,
   });
   const game = KlondikeGame.unserialize(serializedGame);
 
@@ -418,8 +410,8 @@ test("history is modified on every successful move", t => {
     cards: [new Card("Diamonds", "Queen", true)],
     meta: {
       fromPile: 1,
-      toPile: 2
-    }
+      toPile: 2,
+    },
   });
 
   game.makeMove(move);
@@ -440,24 +432,24 @@ test("history is modified on every successful move", t => {
   t.is(game.getHistory().length, 3);
 });
 
-test("getHistory() returns the correct history in order", t => {
+test("getHistory() returns the correct history in order", (t) => {
   const serializedGame = getEmptySerializedGame();
   serializedGame.tableau.piles[0].cards.push(
     {
       suit: "Clubs",
       rank: "King",
-      upturned: true
+      upturned: true,
     },
     {
       suit: "Diamonds",
       rank: "Queen",
-      upturned: true
+      upturned: true,
     }
   );
   serializedGame.tableau.piles[1].cards.push({
     suit: "Spades",
     rank: "King",
-    upturned: true
+    upturned: true,
   });
   const game = KlondikeGame.unserialize(serializedGame);
 
@@ -467,8 +459,8 @@ test("getHistory() returns the correct history in order", t => {
     cards: [new Card("Diamonds", "Queen", true)],
     meta: {
       fromPile: 1,
-      toPile: 2
-    }
+      toPile: 2,
+    },
   });
 
   game.makeMove(move);
@@ -477,8 +469,8 @@ test("getHistory() returns the correct history in order", t => {
     ...move,
     meta: {
       fromPile: 2,
-      toPile: 1
-    }
+      toPile: 1,
+    },
   });
 
   game.makeMove(moveBack);
@@ -521,21 +513,21 @@ test("getHistory() returns the correct history in order", t => {
 // });
 
 // initial game state
-test("7 tableau piles exist on the board", t => {
+test("7 tableau piles exist on the board", (t) => {
   const game = new KlondikeGame();
   game.deal();
   for (let i = 1; i <= 7; i += 1) {
     t.true(game.tableau.getTableauPile(i) instanceof TableauPile);
   }
 });
-test("each tableau pile has the correct amount of cards at the beginning (1 for the 1st, 2 for the 2nd, etc)", t => {
+test("each tableau pile has the correct amount of cards at the beginning (1 for the 1st, 2 for the 2nd, etc)", (t) => {
   const game = new KlondikeGame();
   game.deal();
   for (let i = 1; i <= 7; i += 1) {
     t.is(game.tableau.getTableauPile(i).getCards().length, i);
   }
 });
-test("4 foundation piles exist on the board", t => {
+test("4 foundation piles exist on the board", (t) => {
   const game = new KlondikeGame();
   game.deal();
   t.true(game.foundation.getPileForSuit("Clubs") instanceof FoundationPile);
@@ -544,7 +536,7 @@ test("4 foundation piles exist on the board", t => {
   t.true(game.foundation.getPileForSuit("Diamonds") instanceof FoundationPile);
 });
 
-test("the foundation is empty at the beginning", t => {
+test("the foundation is empty at the beginning", (t) => {
   const game = new KlondikeGame();
   game.deal();
   t.is(game.foundation.getPileForSuit("Clubs").getCards().length, 0);
@@ -553,31 +545,31 @@ test("the foundation is empty at the beginning", t => {
   t.is(game.foundation.getPileForSuit("Diamonds").getCards().length, 0);
 });
 
-test("the waste is empty at the beginning of the game", t => {
+test("the waste is empty at the beginning of the game", (t) => {
   const game = new KlondikeGame();
   game.deal();
   t.is(game.waste.getCards().length, 0);
 });
 
-test("the stock has 24 cards in it the beginning", t => {
+test("the stock has 24 cards in it the beginning", (t) => {
   const game = new KlondikeGame();
   game.deal();
   t.is(game.stock.getCards().length, 24);
 });
 
-test("once the stock has been all pushed into the waste, the next time a move is made from the stock to the waste, the cards should be moved over to the stock again and the waste should be empty", t => {
+test("once the stock has been all pushed into the waste, the next time a move is made from the stock to the waste, the cards should be moved over to the stock again and the waste should be empty", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.waste.cards.push({
     suit: "Clubs",
     rank: "Ace",
-    upturned: true
+    upturned: true,
   });
 
   gameState.stock.cards.push({
     suit: "Hearts",
     rank: "Queen",
-    upturned: false
+    upturned: false,
   });
 
   const game = KlondikeGame.unserialize(gameState);
@@ -599,7 +591,7 @@ test("once the stock has been all pushed into the waste, the next time a move is
   t.is(game.waste.getCards().length, 1);
 });
 
-test("after the stock is empty, and the waste has cards, the stock should be re-filled in the CORRECT order", t => {
+test("after the stock is empty, and the waste has cards, the stock should be re-filled in the CORRECT order", (t) => {
   const gameState = getEmptySerializedGame();
 
   // gameState.waste.cards.push();
@@ -608,17 +600,17 @@ test("after the stock is empty, and the waste has cards, the stock should be re-
     {
       suit: "Hearts",
       rank: "Queen",
-      upturned: false
+      upturned: false,
     },
     {
       suit: "Clubs",
       rank: "2",
-      upturned: false
+      upturned: false,
     },
     {
       suit: "Clubs",
       rank: "Ace",
-      upturned: false
+      upturned: false,
     }
   );
 
@@ -627,14 +619,14 @@ test("after the stock is empty, and the waste has cards, the stock should be re-
   t.deepEqual(game.stock.getCards()[2].serialize(), {
     suit: "Clubs",
     rank: "Ace",
-    upturned: false
+    upturned: false,
   });
   game.draw();
   // first card in should be the card that was at the top of the stock
   t.deepEqual(game.waste.getCards()[0].serialize(), {
     suit: "Clubs",
     rank: "Ace",
-    upturned: true
+    upturned: true,
   });
   game.draw();
   game.draw();
@@ -651,23 +643,23 @@ test("after the stock is empty, and the waste has cards, the stock should be re-
   t.deepEqual(game.waste.getCards()[0].serialize(), {
     suit: "Clubs",
     rank: "Ace",
-    upturned: true
+    upturned: true,
   });
   game.draw();
   t.deepEqual(game.waste.getCards()[1].serialize(), {
     suit: "Clubs",
     rank: "2",
-    upturned: true
+    upturned: true,
   });
 });
 
-test("cannot move a card to the waste from the tableau", t => {
+test("cannot move a card to the waste from the tableau", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.tableau.piles[0].cards.push({
     suit: "Clubs",
     rank: "Ace",
-    upturned: true
+    upturned: true,
   });
 
   const game = KlondikeGame.unserialize(gameState);
@@ -677,8 +669,8 @@ test("cannot move a card to the waste from the tableau", t => {
     to: "waste",
     cards: [Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })],
     meta: {
-      fromPile: 1
-    }
+      fromPile: 1,
+    },
   });
 
   const canMakeMove = game.validateMove(move);
@@ -686,13 +678,13 @@ test("cannot move a card to the waste from the tableau", t => {
   t.false(canMakeMove.valid);
 });
 
-test("cannot move a card to the waste from the foundation", t => {
+test("cannot move a card to the waste from the foundation", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.foundation.clubs.cards.push({
     suit: "Clubs",
     rank: "Ace",
-    upturned: true
+    upturned: true,
   });
 
   const game = KlondikeGame.unserialize(gameState);
@@ -700,7 +692,7 @@ test("cannot move a card to the waste from the foundation", t => {
   const move = new Move({
     from: "foundation",
     to: "waste",
-    cards: [Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })]
+    cards: [Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })],
   });
 
   const canMakeMove = game.validateMove(move);
@@ -708,13 +700,13 @@ test("cannot move a card to the waste from the foundation", t => {
   t.false(canMakeMove.valid);
 });
 
-test("cannot move a card to the stock from the tableau", t => {
+test("cannot move a card to the stock from the tableau", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.tableau.piles[0].cards.push({
     suit: "Clubs",
     rank: "Ace",
-    upturned: true
+    upturned: true,
   });
 
   const game = KlondikeGame.unserialize(gameState);
@@ -725,14 +717,14 @@ test("cannot move a card to the stock from the tableau", t => {
     to: "stock",
     cards: [Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })],
     meta: {
-      fromPile: 1
-    }
+      fromPile: 1,
+    },
   });
 
   t.false(canMakeMove.valid);
 });
 
-test("cannot move a card to the stock from the waste", t => {
+test("cannot move a card to the stock from the waste", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.waste.cards.push({ suit: "Clubs", rank: "Ace", upturned: true });
@@ -743,13 +735,13 @@ test("cannot move a card to the stock from the waste", t => {
     from: "waste",
     // @ts-ignore
     to: "stock",
-    cards: [Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })]
+    cards: [Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })],
   });
 
   t.false(canMakeMove.valid);
 });
 
-test("cannot move a card to the stock from the foundation", t => {
+test("cannot move a card to the stock from the foundation", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.stock.cards.push({ suit: "Clubs", rank: "Ace", upturned: false });
@@ -757,7 +749,7 @@ test("cannot move a card to the stock from the foundation", t => {
   gameState.foundation.clubs.cards.push({
     suit: "Clubs",
     rank: "2",
-    upturned: true
+    upturned: true,
   });
 
   const game = KlondikeGame.unserialize(gameState);
@@ -770,15 +762,15 @@ test("cannot move a card to the stock from the foundation", t => {
       Card.unserialize({
         suit: "Clubs",
         rank: "2",
-        upturned: true
-      })
-    ]
+        upturned: true,
+      }),
+    ],
   });
 
   t.false(canMakeMove.valid);
 });
 
-test("cannot move more than one card from the stock to the foundation", t => {
+test("cannot move more than one card from the stock to the foundation", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.stock.cards.push(
@@ -788,7 +780,7 @@ test("cannot move more than one card from the stock to the foundation", t => {
   gameState.foundation.clubs.cards.push({
     suit: "Clubs",
     rank: "3",
-    upturned: true
+    upturned: true,
   });
 
   const game = KlondikeGame.unserialize(gameState);
@@ -798,8 +790,8 @@ test("cannot move more than one card from the stock to the foundation", t => {
     to: "foundation",
     cards: [
       Card.unserialize({ suit: "Clubs", rank: "2", upturned: false }),
-      Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })
-    ]
+      Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true }),
+    ],
   });
 
   const canMakeMove = game.validateMove(move);
@@ -807,7 +799,7 @@ test("cannot move more than one card from the stock to the foundation", t => {
   t.false(canMakeMove.valid);
 });
 
-test("cannot move more than one card from the waste", t => {
+test("cannot move more than one card from the waste", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.waste.cards.push(
@@ -817,7 +809,7 @@ test("cannot move more than one card from the waste", t => {
   gameState.foundation.clubs.cards.push({
     suit: "Clubs",
     rank: "3",
-    upturned: true
+    upturned: true,
   });
 
   const game = KlondikeGame.unserialize(gameState);
@@ -827,8 +819,8 @@ test("cannot move more than one card from the waste", t => {
     to: "foundation",
     cards: [
       Card.unserialize({ suit: "Clubs", rank: "2", upturned: true }),
-      Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })
-    ]
+      Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true }),
+    ],
   });
 
   const canMakeMove = game.validateMove(move);
@@ -836,7 +828,7 @@ test("cannot move more than one card from the waste", t => {
   t.false(canMakeMove.valid);
 });
 
-test("cannot move more than one card from the stock to the tableau", t => {
+test("cannot move more than one card from the stock to the tableau", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.stock.cards.push(
@@ -846,7 +838,7 @@ test("cannot move more than one card from the stock to the tableau", t => {
   gameState.tableau.piles[0].cards.push({
     suit: "Hearts",
     rank: "3",
-    upturned: true
+    upturned: true,
   });
 
   const game = KlondikeGame.unserialize(gameState);
@@ -856,11 +848,11 @@ test("cannot move more than one card from the stock to the tableau", t => {
     to: "tableau",
     cards: [
       Card.unserialize({ suit: "Clubs", rank: "2", upturned: false }),
-      Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })
+      Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true }),
     ],
     meta: {
-      toPile: 1
-    }
+      toPile: 1,
+    },
   });
 
   const canMakeMove = game.validateMove(move);
@@ -868,7 +860,7 @@ test("cannot move more than one card from the stock to the tableau", t => {
   t.false(canMakeMove.valid);
 });
 
-test("cannot move more than one card from the foundation to the tableau", t => {
+test("cannot move more than one card from the foundation to the tableau", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.foundation.clubs.cards.push(
@@ -878,7 +870,7 @@ test("cannot move more than one card from the foundation to the tableau", t => {
   gameState.tableau.piles[0].cards.push({
     suit: "Hearts",
     rank: "3",
-    upturned: true
+    upturned: true,
   });
 
   const game = KlondikeGame.unserialize(gameState);
@@ -888,11 +880,11 @@ test("cannot move more than one card from the foundation to the tableau", t => {
     to: "tableau",
     cards: [
       Card.unserialize({ suit: "Clubs", rank: "2", upturned: true }),
-      Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true })
+      Card.unserialize({ suit: "Clubs", rank: "Ace", upturned: true }),
     ],
     meta: {
-      toPile: 1
-    }
+      toPile: 1,
+    },
   });
 
   const canMakeMove = game.validateMove(move);
@@ -900,7 +892,7 @@ test("cannot move more than one card from the foundation to the tableau", t => {
   t.false(canMakeMove.valid);
 });
 
-test("can move a card from the waste to the tableau", t => {
+test("can move a card from the waste to the tableau", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.waste.cards.push({ suit: "Hearts", rank: "King", upturned: true });
@@ -912,8 +904,8 @@ test("can move a card from the waste to the tableau", t => {
     from: "waste",
     to: "tableau",
     meta: {
-      toPile: 1
-    }
+      toPile: 1,
+    },
   });
 
   const canMakeMove = game.validateMove(move);
@@ -928,7 +920,7 @@ test("can move a card from the waste to the tableau", t => {
   );
 });
 
-test("can move a card from the waste to the foundation", t => {
+test("can move a card from the waste to the foundation", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.waste.cards.push({ suit: "Hearts", rank: "Ace", upturned: true });
@@ -938,7 +930,7 @@ test("can move a card from the waste to the foundation", t => {
   const move = new Move({
     cards: [Card.unserialize({ suit: "Hearts", rank: "Ace", upturned: true })],
     from: "waste",
-    to: "foundation"
+    to: "foundation",
   });
 
   const canMakeMove = game.validateMove(move);
@@ -953,13 +945,13 @@ test("can move a card from the waste to the foundation", t => {
   );
 });
 
-test("can move a card from the tableau to the foundation", t => {
+test("can move a card from the tableau to the foundation", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.tableau.piles[0].cards.push({
     suit: "Clubs",
     rank: "Ace",
-    upturned: true
+    upturned: true,
   });
 
   const game = KlondikeGame.unserialize(gameState);
@@ -969,8 +961,8 @@ test("can move a card from the tableau to the foundation", t => {
     from: "tableau",
     to: "foundation",
     meta: {
-      fromPile: 1
-    }
+      fromPile: 1,
+    },
   });
 
   const canMakeMove = game.validateMove(move);
@@ -985,18 +977,18 @@ test("can move a card from the tableau to the foundation", t => {
   );
 });
 
-test("can move a card from the tableau to the tableau", t => {
+test("can move a card from the tableau to the tableau", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.tableau.piles[0].cards.push({
     suit: "Clubs",
     rank: "5",
-    upturned: true
+    upturned: true,
   });
   gameState.tableau.piles[1].cards.push({
     suit: "Hearts",
     rank: "6",
-    upturned: true
+    upturned: true,
   });
 
   const game = KlondikeGame.unserialize(gameState);
@@ -1007,8 +999,8 @@ test("can move a card from the tableau to the tableau", t => {
     to: "tableau",
     meta: {
       fromPile: 1,
-      toPile: 2
-    }
+      toPile: 2,
+    },
   });
 
   const canMakeMove = game.validateMove(move);
@@ -1023,7 +1015,7 @@ test("can move a card from the tableau to the tableau", t => {
   );
 });
 
-test("can move multiple cards from the tableau to the tableau", t => {
+test("can move multiple cards from the tableau to the tableau", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.tableau.piles[0].cards.push(
@@ -1033,7 +1025,7 @@ test("can move multiple cards from the tableau to the tableau", t => {
   gameState.tableau.piles[1].cards.push({
     suit: "Hearts",
     rank: "6",
-    upturned: true
+    upturned: true,
   });
 
   const game = KlondikeGame.unserialize(gameState);
@@ -1041,14 +1033,14 @@ test("can move multiple cards from the tableau to the tableau", t => {
   const move = new Move({
     cards: [
       Card.unserialize({ suit: "Clubs", rank: "5", upturned: true }),
-      Card.unserialize({ suit: "Hearts", rank: "4", upturned: true })
+      Card.unserialize({ suit: "Hearts", rank: "4", upturned: true }),
     ],
     from: "tableau",
     to: "tableau",
     meta: {
       fromPile: 1,
-      toPile: 2
-    }
+      toPile: 2,
+    },
   });
 
   const canMakeMove = game.validateMove(move);
@@ -1067,18 +1059,18 @@ test("can move multiple cards from the tableau to the tableau", t => {
   );
 });
 
-test("can move a card from the foundation to the tableau", t => {
+test("can move a card from the foundation to the tableau", (t) => {
   const gameState = getEmptySerializedGame();
 
   gameState.tableau.piles[0].cards.push({
     suit: "Hearts",
     rank: "4",
-    upturned: true
+    upturned: true,
   });
   gameState.foundation.clubs.cards.push({
     suit: "Clubs",
     rank: "3",
-    upturned: true
+    upturned: true,
   });
 
   const game = KlondikeGame.unserialize(gameState);
@@ -1088,8 +1080,8 @@ test("can move a card from the foundation to the tableau", t => {
     from: "foundation",
     to: "tableau",
     meta: {
-      toPile: 1
-    }
+      toPile: 1,
+    },
   });
 
   const canMakeMove = game.validateMove(move);
@@ -1105,7 +1097,7 @@ test("can move a card from the foundation to the tableau", t => {
 });
 
 // unserialize and serialize
-test("unserializing the saved game state, puts it back in the same state", t => {
+test("unserializing the saved game state, puts it back in the same state", (t) => {
   const serializedGame: ISerializedKlondikeGame = {
     foundation: {
       clubs: {
@@ -1113,8 +1105,8 @@ test("unserializing the saved game state, puts it back in the same state", t => 
         cards: [
           { suit: "Clubs", rank: "Ace", upturned: false },
           { suit: "Clubs", rank: "2", upturned: false },
-          { suit: "Clubs", rank: "3", upturned: false }
-        ]
+          { suit: "Clubs", rank: "3", upturned: false },
+        ],
       },
       hearts: {
         suit: "Hearts",
@@ -1123,8 +1115,8 @@ test("unserializing the saved game state, puts it back in the same state", t => 
           { suit: "Hearts", rank: "2", upturned: false },
           { suit: "Hearts", rank: "3", upturned: false },
           { suit: "Hearts", rank: "4", upturned: false },
-          { suit: "Hearts", rank: "5", upturned: false }
-        ]
+          { suit: "Hearts", rank: "5", upturned: false },
+        ],
       },
       diamonds: {
         suit: "Diamonds",
@@ -1136,85 +1128,85 @@ test("unserializing the saved game state, puts it back in the same state", t => 
           { suit: "Diamonds", rank: "5", upturned: false },
           { suit: "Diamonds", rank: "6", upturned: false },
           { suit: "Diamonds", rank: "7", upturned: false },
-          { suit: "Diamonds", rank: "8", upturned: false }
-        ]
+          { suit: "Diamonds", rank: "8", upturned: false },
+        ],
       },
       spades: {
         suit: "Spades",
         cards: [
           { suit: "Spades", rank: "Ace", upturned: false },
-          { suit: "Spades", rank: "2", upturned: false }
-        ]
-      }
+          { suit: "Spades", rank: "2", upturned: false },
+        ],
+      },
     },
     stock: {
       cards: [
         {
           suit: "Spades",
           rank: "10",
-          upturned: false
+          upturned: false,
         },
         {
           suit: "Spades",
           rank: "6",
-          upturned: false
+          upturned: false,
         },
         {
           suit: "Spades",
           rank: "7",
-          upturned: false
+          upturned: false,
         },
         {
           suit: "Spades",
           rank: "8",
-          upturned: false
+          upturned: false,
         },
         {
           suit: "Clubs",
           rank: "6",
-          upturned: false
+          upturned: false,
         },
         {
           suit: "Clubs",
           rank: "Jack",
-          upturned: false
+          upturned: false,
         },
         {
           suit: "Hearts",
           rank: "8",
-          upturned: false
+          upturned: false,
         },
         {
           suit: "Spades",
           rank: "4",
-          upturned: false
+          upturned: false,
         },
         {
           suit: "Clubs",
           rank: "8",
-          upturned: false
+          upturned: false,
         },
         {
           suit: "Clubs",
           rank: "5",
-          upturned: false
+          upturned: false,
         },
         {
           suit: "Spades",
           rank: "5",
-          upturned: false
+          upturned: false,
         },
         {
           suit: "Spades",
           rank: "Queen",
-          upturned: false
+          upturned: false,
         },
         {
           suit: "Hearts",
           rank: "Queen",
-          upturned: false
-        }
-      ]
+          upturned: false,
+        },
+      ],
     },
     history: [
       {
@@ -1227,39 +1219,39 @@ test("unserializing the saved game state, puts it back in the same state", t => 
             {
               rank: "10",
               suit: "Spades",
-              upturned: true
-            }
+              upturned: true,
+            },
           ],
           meta: {
             fromPile: 1,
-            toPile: 5
-          }
-        }
-      }
+            toPile: 5,
+          },
+        },
+      },
     ],
     waste: {
       cards: [
         {
           suit: "Diamonds",
           rank: "King",
-          upturned: true
+          upturned: true,
         },
         {
           suit: "Hearts",
           rank: "7",
-          upturned: true
+          upturned: true,
         },
         {
           suit: "Spades",
           rank: "3",
-          upturned: true
+          upturned: true,
         },
         {
           suit: "Spades",
           rank: "Jack",
-          upturned: true
-        }
-      ]
+          upturned: true,
+        },
+      ],
     },
     tableau: {
       piles: [
@@ -1270,14 +1262,14 @@ test("unserializing the saved game state, puts it back in the same state", t => 
             {
               suit: "Diamonds",
               rank: "9",
-              upturned: false
+              upturned: false,
             },
             {
               suit: "Clubs",
               rank: "9",
-              upturned: true
-            }
-          ]
+              upturned: true,
+            },
+          ],
         },
         // empty pile
         { cards: [] },
@@ -1286,94 +1278,94 @@ test("unserializing the saved game state, puts it back in the same state", t => 
             {
               suit: "Spades",
               rank: "9",
-              upturned: false
+              upturned: false,
             },
             {
               suit: "Hearts",
               rank: "Jack",
-              upturned: false
+              upturned: false,
             },
             {
               suit: "Diamonds",
               rank: "10",
-              upturned: false
+              upturned: false,
             },
             {
               suit: "Clubs",
               rank: "4",
-              upturned: true
-            }
-          ]
+              upturned: true,
+            },
+          ],
         },
         {
           cards: [
             {
               suit: "Spades",
               rank: "King",
-              upturned: false
+              upturned: false,
             },
             {
               suit: "Hearts",
               rank: "10",
-              upturned: false
+              upturned: false,
             },
             {
               suit: "Hearts",
               rank: "King",
-              upturned: true
-            }
-          ]
+              upturned: true,
+            },
+          ],
         },
         {
           cards: [
             {
               suit: "Clubs",
               rank: "Queen",
-              upturned: false
+              upturned: false,
             },
             {
               suit: "Clubs",
               rank: "10",
-              upturned: false
+              upturned: false,
             },
             {
               suit: "Diamonds",
               rank: "Jack",
-              upturned: true
-            }
-          ]
+              upturned: true,
+            },
+          ],
         },
         {
           cards: [
             {
               suit: "Hearts",
               rank: "6",
-              upturned: false
+              upturned: false,
             },
             {
               suit: "Diamonds",
               rank: "Queen",
-              upturned: false
+              upturned: false,
             },
             {
               suit: "Hearts",
               rank: "9",
-              upturned: false
+              upturned: false,
             },
             {
               suit: "Clubs",
               rank: "7",
-              upturned: false
+              upturned: false,
             },
             {
               suit: "Clubs",
               rank: "King",
-              upturned: true
-            }
-          ]
-        }
-      ]
-    }
+              upturned: true,
+            },
+          ],
+        },
+      ],
+    },
   };
 
   const game = KlondikeGame.unserialize(serializedGame);

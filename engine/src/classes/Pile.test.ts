@@ -1,11 +1,11 @@
-import test from "ava";
-import { Pile } from "./Pile";
-import { Card } from "./Card";
-import { getRandomSuit } from "../helpers/getRandomSuit";
-import { getRandomRank } from "../helpers/getRandomRank";
-import { getSerializedDeck } from "../helpers/getSerializedDeck";
 import { shuffle } from "@korziee/helpers";
-import * as _ from "lodash";
+import test from "ava";
+import isEqual from "lodash.isequal";
+import { getRandomRank } from "../helpers/getRandomRank";
+import { getRandomSuit } from "../helpers/getRandomSuit";
+import { getSerializedDeck } from "../helpers/getSerializedDeck";
+import { Card } from "./Card";
+import { Pile } from "./Pile";
 
 /**
  * Returns a pile with the abstract methods implemented
@@ -37,7 +37,7 @@ const getRandomCards = (amount: number): Card[] => {
 };
 
 const getDeckOfCards = (): Card[] => {
-  return getSerializedDeck().map(c => new Card(c.suit, c.rank, c.upturned));
+  return getSerializedDeck().map((c) => new Card(c.suit, c.rank, c.upturned));
 };
 
 /**
@@ -47,17 +47,17 @@ const getUniqueCards = (amount: number): Card[] => {
   if (amount > 52) {
     throw new Error("cannot generate more than 52 unique cards");
   }
-  const shuffledDeck = _.shuffle(getDeckOfCards());
+  const shuffledDeck = shuffle(getDeckOfCards());
   return shuffledDeck.slice(0, amount);
 };
 
-test("Can instanstiate the constructor", t => {
+test("Can instanstiate the constructor", (t) => {
   const cards = getRandomCards(10);
   getPileForTesting(cards);
   t.pass();
 });
 
-test("getCards() returns the cards passed to the class in the correct order", t => {
+test("getCards() returns the cards passed to the class in the correct order", (t) => {
   const cards = getRandomCards(10);
   const pile = getPileForTesting(cards);
   const cardsInPile = pile.getCards();
@@ -65,7 +65,7 @@ test("getCards() returns the cards passed to the class in the correct order", t 
   cards.forEach((card, i) => t.is(card, cardsInPile[i]));
 });
 
-test("setCards() sets cards correctly", t => {
+test("setCards() sets cards correctly", (t) => {
   const cards = getRandomCards(10);
   const pile = getPileForTesting([]);
 
@@ -78,7 +78,7 @@ test("setCards() sets cards correctly", t => {
   t.is(cardsInPile[1], cards[6]);
 });
 
-test("setCards() overwrites the existing cards", t => {
+test("setCards() overwrites the existing cards", (t) => {
   const cards = getRandomCards(10);
   const pile = getPileForTesting(cards);
   const cardsInPileBeforeSet = pile.getCards();
@@ -92,7 +92,7 @@ test("setCards() overwrites the existing cards", t => {
   newCards.forEach((card, i) => t.is(card, cardsInPile[i]));
 });
 
-test("addCards() adds cards", t => {
+test("addCards() adds cards", (t) => {
   const cards = getRandomCards(2);
   const pile = getPileForTesting([]);
 
@@ -103,7 +103,7 @@ test("addCards() adds cards", t => {
   cards.forEach((card, i) => t.is(card, cardsInPile[i]));
 });
 
-test("addCards() adds to the exists cards", t => {
+test("addCards() adds to the exists cards", (t) => {
   const cards = getRandomCards(2);
   const pile = getPileForTesting(cards);
 
@@ -116,7 +116,7 @@ test("addCards() adds to the exists cards", t => {
   additionalCards.forEach((card, i) => t.is(card, cardsInPile[i + 2]));
 });
 
-test("removeCards() removes the correct amount of cards", t => {
+test("removeCards() removes the correct amount of cards", (t) => {
   const cards = getUniqueCards(50);
 
   const pile = getPileForTesting(cards);
@@ -126,7 +126,7 @@ test("removeCards() removes the correct amount of cards", t => {
   t.is(pile.getCards().length, 46);
 });
 
-test("removeCards() returns a true if the removal was achieved", t => {
+test("removeCards() returns a true if the removal was achieved", (t) => {
   const cards = getUniqueCards(50);
 
   const pile = getPileForTesting(cards);
@@ -135,14 +135,14 @@ test("removeCards() returns a true if the removal was achieved", t => {
     cards[10],
     cards[20],
     cards[30],
-    cards[40]
+    cards[40],
   ]);
 
   t.is(pile.getCards().length, 46);
   t.true(didRemove);
 });
 
-test("removeCards() returns false if the removal was unsuccesful", t => {
+test("removeCards() returns false if the removal was unsuccesful", (t) => {
   const cards = getUniqueCards(50);
 
   class PileWithFailingValidation extends Pile {
@@ -157,13 +157,13 @@ test("removeCards() returns false if the removal was unsuccesful", t => {
     cards[10],
     cards[20],
     cards[30],
-    cards[40]
+    cards[40],
   ]);
   t.false(didRemove);
 });
 
-test("removeCards() ignores the 'upturned' state of a Card", t => {
-  const cards = getDeckOfCards().map(c => {
+test("removeCards() ignores the 'upturned' state of a Card", (t) => {
+  const cards = getDeckOfCards().map((c) => {
     Math.random() > 0.5 ? c.turnUp() : c.turnDown();
     return c;
   });
@@ -175,7 +175,7 @@ test("removeCards() ignores the 'upturned' state of a Card", t => {
   t.is(pile.getCards().length, 48);
 });
 
-test("removeCards() removes the correct cards", t => {
+test("removeCards() removes the correct cards", (t) => {
   const cards = getDeckOfCards();
 
   const pile = getPileForTesting(cards);
@@ -196,7 +196,7 @@ test("removeCards() removes the correct cards", t => {
   t.is(pile.getCards().length, 48);
 });
 
-test("clear() removes all cards", t => {
+test("clear() removes all cards", (t) => {
   const cards = getRandomCards(52);
   const pile = getPileForTesting(cards);
   t.is(pile.getCards().length, 52);
@@ -204,7 +204,7 @@ test("clear() removes all cards", t => {
   t.is(pile.getCards().length, 0);
 });
 
-test("clear() returns the cleared cards in the correct order", t => {
+test("clear() returns the cleared cards in the correct order", (t) => {
   const cards = getRandomCards(52);
   const pile = getPileForTesting(cards);
   t.is(pile.getCards().length, 52);
@@ -215,7 +215,7 @@ test("clear() returns the cleared cards in the correct order", t => {
   cards.forEach((card, i) => t.is(card, clearedCards[i]));
 });
 
-test("serialize() returns the correct serialized state", t => {
+test("serialize() returns the correct serialized state", (t) => {
   const cards = getRandomCards(5);
   const pile = getPileForTesting(cards);
   const serializedPile = pile.serialize();
@@ -225,12 +225,12 @@ test("serialize() returns the correct serialized state", t => {
   }
 });
 
-test("unserialize() returns a working class with the right data", t => {
+test("unserialize() returns a working class with the right data", (t) => {
   const pile = Pile.unserialize({
     cards: [
       { rank: "5", suit: "Spades", upturned: true },
-      { rank: "10", suit: "Hearts", upturned: true }
-    ]
+      { rank: "10", suit: "Hearts", upturned: true },
+    ],
   });
   t.is(pile.getCards()[0].getRank(), "5");
   t.is(pile.getCards()[0].getSuit(), "Spades");
@@ -238,19 +238,19 @@ test("unserialize() returns a working class with the right data", t => {
   t.is(pile.getCards()[1].getUpturned(), true);
 });
 
-test("canRemoveCards() throws if unimplemented", t => {
+test("canRemoveCards() throws if unimplemented", (t) => {
   t.throws(() => new Pile([]).canRemoveCards([]));
 });
 
-test("canAddCards() throws if unimplemented", t => {
+test("canAddCards() throws if unimplemented", (t) => {
   t.throws(() => new Pile([]).canAddCards([]));
 });
 
-test("canSetCards() throws if unimplemented", t => {
+test("canSetCards() throws if unimplemented", (t) => {
   t.throws(() => new Pile([]).canSetCards([]));
 });
 
-test("addCards() does not add cards if the validation fails", t => {
+test("addCards() does not add cards if the validation fails", (t) => {
   class PileWithFailingValidation extends Pile {
     canAddCards() {
       return false;
@@ -266,7 +266,7 @@ test("addCards() does not add cards if the validation fails", t => {
   t.is(pile.getCards().length, 0);
 });
 
-test("removeCards() does not remove cards if the validation fails", t => {
+test("removeCards() does not remove cards if the validation fails", (t) => {
   class PileWithFailingValidation extends Pile {
     canRemoveCards() {
       return false;
@@ -275,7 +275,7 @@ test("removeCards() does not remove cards if the validation fails", t => {
 
   const pile = new PileWithFailingValidation([
     new Card("Clubs", "Ace", false),
-    new Card("Clubs", "2", false)
+    new Card("Clubs", "2", false),
   ]);
 
   pile.removeCards([new Card("Clubs", "Ace", false)]);
@@ -285,13 +285,13 @@ test("removeCards() does not remove cards if the validation fails", t => {
 });
 // there is no hard and fast math in this test
 // it just test that atleast 10 out of 52 cards, do not match the original
-test("shuffle() shuffles the cards within the pile", t => {
+test("shuffle() shuffles the cards within the pile", (t) => {
   const cards = getDeckOfCards();
   const pile = getPileForTesting(cards);
 
   pile.shuffle();
 
-  const equalCount = pile.getCards().filter((c, i) => _.isEqual(c, cards[i]));
+  const equalCount = pile.getCards().filter((c, i) => isEqual(c, cards[i]));
 
   t.true(equalCount.length < 10);
 });
