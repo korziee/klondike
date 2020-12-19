@@ -1,0 +1,29 @@
+{
+  "name": "@cards-js/aces-up",
+  "version": "0.0.0-beta.0",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "scripts": {
+    "test": "ava src/**/*.test.ts",
+    "test:watch": "ava --watch src/**/*.test.ts"
+  },
+  "ava": {
+    "compileEnhancements": false,
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register/transpile-only"
+    ]
+  },
+  "devDependencies": {
+    "@types/lodash.shuffle": "^4.2.6",
+    "ava": "^2.4.0",
+    "ts-node": "^8.4.1",
+    "typescript": "^4.1.3"
+  },
+  "dependencies": {
+    "@cards-js/common": "*",
+    "lodash.shuffle": "^4.2.0"
+  }
+}

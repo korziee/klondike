@@ -1,5 +1,5 @@
 {
-  "name": "klondike",
+  "name": "cards-js",
   "version": "1.0.0",
   "description": "A klondike (solitaire) game engine alongside a companion react app!",
   "main": "index.js",
@@ -8,6 +8,9 @@
   "license": "MIT",
   "private": true,
   "workspaces": [
+    "common",
+    "klondike",
+    "aces-up",
     "engine",
     "react-app"
   ]
